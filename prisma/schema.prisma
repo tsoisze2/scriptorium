@@ -108,8 +108,7 @@ model Reply {
   reports         Report[]
 }
 
-
-model Rating {
+model RatingBlogPost {
   id              Int               @id @default(autoincrement())
   upvote          Boolean
 
@@ -117,28 +116,55 @@ model Rating {
   authorId        Int
   author          User              @relation(fields: [authorId], references: [id])
 
-  // Optional foreign key relations (Rating can be for either a BlogPost or a Comment)
-  blogPostId      Int?
-  blogPost        BlogPost?         @relation(fields: [blogPostId], references: [id])
-
-  commentId       Int?
-  comment         Comment?          @relation(fields: [commentId], references: [id])
+  // Foreign key relations
+  blogPostId      Int 
+  blogPost        BlogPost          @relation(fields: [blogPostId], references: [id])
 }
 
-model Report {
+model RatingComment {
   id              Int               @id @default(autoincrement())
-  reportContent   String
+  upvote          Boolean
 
   // Foreign key relation to User
   authorId        Int
   author          User              @relation(fields: [authorId], references: [id])
 
-  // Optional foreign key relations (Report can be for a BlogPost, Comment, or Reply)
-  blogPostId      Int?
-  blogPost        BlogPost?         @relation(fields: [blogPostId], references: [id])
+  // Foreign key relations
+  commentId       Int 
+  comment         Comment           @relation(fields: [commentId], references: [id])
+}
+
+model ReportBlogPost {
+  id              Int               @id @default(autoincrement())
+  content         String
+
+  // Foreign key relation to User
+  authorId        Int
+  author          User              @relation(fields: [authorId], references: [id])
+
+  blogPostId      Int
+  blogPost        BlogPost          @relation(fields: [blogPostId], references: [id])
+}
+
+model ReportComment {
+  id              Int               @id @default(autoincrement())
+  content         String
+
+  // Foreign key relation to User
+  authorId        Int
+  author          User              @relation(fields: [authorId], references: [id])
 
   commentId       Int?
   comment         Comment?          @relation(fields: [commentId], references: [id])
+}
+
+model ReportReply {
+  id              Int               @id @default(autoincrement())
+  content         String
+
+  // Foreign key relation to User
+  authorId        Int
+  author          User              @relation(fields: [authorId], references: [id])
 
   replyId         Int?
   reply           Reply?            @relation(fields: [replyId], references: [id])
