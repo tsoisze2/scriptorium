@@ -1,6 +1,7 @@
-import prisma from '../../lib/prisma';
+import prisma from "@/utils/db";
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import { verifyTokenRefreshMdw } from "@/utils/auth"; 
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -11,7 +12,7 @@ export default async function handler(req, res) {
 
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
-      const userId = decoded.userId;
+      const userId = verifyTokenRefreshMdw;
 
       let hashedPassword = null;
       if (newPassword) {
