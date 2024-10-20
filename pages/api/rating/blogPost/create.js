@@ -1,13 +1,13 @@
-// pages/api/comment/create.js
+// pages/api/rating/blogPost/create.js
 
 import prisma from "@/utils/db";
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { content, authorId, blogPostId } = req.body;
+    const { upvote, authorId, blogPostId } = req.body;
 
     // Validate request body
-    if (!content || !authorId || !blogPostId || isNaN(Number(authorId)) || isNaN(Number(blogPostId))) {
+    if ((upvote !== "true" && upvote !== "false") || !authorId || !blogPostId || isNaN(Number(authorId)) || isNaN(Number(authorId))) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -21,13 +21,14 @@ export default async function handler(req, res) {
       return res.status(404).json({ message: 'blogPost ID does not exist' });
     }
 
+
+    const isUpvote = upvote === "true";
+
     try {
-      // Create a new comment
-      const newComment = await prisma.comment.create({
+      // Create a new rating
+      const newRating = await prisma.ratingBlogPost.create({
         data: {
-          content: content,
-          visibleToPublic: true, // Set to true by default
-          createdAt: new Date(), // Set the current date
+          upvote: isUpvote,
           author: {
             connect: { id: Number(authorId) }, // Link to the author by their ID
           },
@@ -37,11 +38,11 @@ export default async function handler(req, res) {
         },
       });
 
-      // Return the newly created comment
-      return res.status(201).json(newComment);
+      // Return the newly created rating
+      return res.status(201).json(newRating);
     } catch (error) {
-      console.error('Error creating comment:', error);
-      return res.status(500).json({ error: 'Failed to create comment' });
+      console.error('Error creating rating:', error);
+      return res.status(500).json({ error: 'Failed to create rating' });
     }
   } else {
     // Handle other HTTP methods
