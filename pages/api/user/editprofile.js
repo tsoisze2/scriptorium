@@ -1,32 +1,29 @@
 import prisma from "@/utils/db";
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import { verifyTokenRefreshMdw } from "@/utils/auth"; 
+import { verifyTokenMdw, hashPassword } from "@/utils/auth"; 
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 export default async function handler(req, res) {
   if (req.method === 'PUT') {
-    const { token } = req.headers;
+    const user = verifyTokenMdw(req);
     const { firstName, lastName, email, phoneNum, avatarUrl, newPassword } = req.body;
 
     try {
-      const decoded = jwt.verify(token, JWT_SECRET);
-      const userId = verifyTokenRefreshMdw;
+      const username = user.username;
 
       let hashedPassword = null;
       if (newPassword) {
-        hashedPassword = await bcrypt.hash(newPassword, 10);
+        hashedPassword = await hashPassword(newPassword);
       }
 
       const updatedUser = await prisma.user.update({
-        where: { id: userId },
+        where: { username: username },
         data: {
-          firstName,
-          lastName,
-          email,
-          phoneNum,
-          avatarUrl,
+          ...(firstName && { firstName: firstName }),
+          ...(lastName && { lastName: lastName }),
+          ...(email && { email: email }),
+          ...(phoneNum && { phoneNum: phoneNum }),
+          ...(avatarUrl && { avatarUrl: avatarUrl }),
           ...(newPassword && { password: hashedPassword }),
         },
       });
