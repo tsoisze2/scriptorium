@@ -4,14 +4,18 @@ import prisma from "@/utils/db";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        const { content, authorId, blogPostId } = req.body;
+        const { content, blogPostId } = req.body;
 
         // Validate request body
-        if (!content || !authorId || !blogPostId || isNaN(Number(authorId)) || isNaN(Number(blogPostId))) {
+        if (!content || !blogPostId || isNaN(Number(blogPostId))) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
         // Validate user
+        const user = verifyTokenMdw(req);
+        if (!user) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
 
         // Validate blogPostId
         const blogPostExists = await prisma.blogPost.findUnique({
@@ -22,12 +26,21 @@ export default async function handler(req, res) {
         }
 
         try {
+            // Set the authorId 
+            const loggedInUser = await prisma.user.findUnique({
+                where: { username: user.username },
+                select: { id: true },
+            });
+            if (!loggedInUser) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
             // Create a new report
             const newReport = await prisma.reportBlogPost.create({
                 data: {
                     content: content,
                     author: {
-                        connect: { id: Number(authorId) }, // Link to the author by their ID
+                        connect: { id: loggedInUser.id }, // Link to the author by their ID
                     },
                     blogPost: {
                         connect: { id: Number(blogPostId) }, // Link to the comment by its ID

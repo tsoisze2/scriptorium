@@ -23,8 +23,11 @@ model User {
   codeTemplates   CodeTemplate[]
   comments        Comment[]
   replies         Reply[]
-  ratings         Rating[]
-  reports         Report[]
+  ratingBlogPosts RatingBlogPost[]
+  ratingComments  RatingComment[]
+  reportBlogPosts ReportBlogPost[]
+  reportComments  ReportComment[]
+  reportReplies   ReportReply[]
 }
 
 model CodeTemplate {
@@ -61,8 +64,8 @@ model BlogPost {
   // Relations
   tags            Tag[]            @relation("BlogPostTags")
   comments        Comment[]
-  ratings         Rating[]
-  reports         Report[]
+  ratings         RatingBlogPost[]
+  reports         ReportBlogPost[]
 }
 
 model Comment {
@@ -81,8 +84,8 @@ model Comment {
 
   // Relations
   replies         Reply[]
-  ratings         Rating[]
-  reports         Report[]
+  ratings         RatingComment[]
+  reports         ReportComment[]
 }
 
 model Reply {
@@ -105,7 +108,7 @@ model Reply {
   replies         Reply[]           @relation("ReplyingToReply")
 
   // Relations
-  reports         Report[]
+  reports         ReportReply[]
 }
 
 model RatingBlogPost {

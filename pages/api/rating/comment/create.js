@@ -4,14 +4,18 @@ import prisma from "@/utils/db";
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { upvote, authorId, commentId } = req.body;
+    const { upvote, commentId } = req.body;
 
     // Validate request body
-    if ((upvote !== "true" && upvote !== "false") || !authorId || !commentId || isNaN(Number(authorId)) || isNaN(Number(commentId))) {
+    if ((upvote !== "true" && upvote !== "false") || !commentId || isNaN(Number(commentId))) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
     // Validate user
+    const user = verifyTokenMdw(req);
+    if (!user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
 
     // Validate commentId
     const commentExists = await prisma.comment.findUnique({
@@ -24,12 +28,21 @@ export default async function handler(req, res) {
     const isUpvote = upvote === "true";
 
     try {
+      // Set the authorId 
+      const loggedInUser = await prisma.user.findUnique({
+        where: { username: user.username },
+        select: { id: true },
+      });
+      if (!loggedInUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
       // Create a new rating
       const newRating = await prisma.ratingComment.create({
         data: {
           upvote: isUpvote,
           author: {
-            connect: { id: Number(authorId) }, // Link to the author by their ID
+            connect: { id: loggedInUser.id }, // Link to the author by their ID
           },
           comment: {
             connect: { id: Number(commentId) }, // Link to the comment by its ID
