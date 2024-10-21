@@ -18,6 +18,7 @@ model User {
   avatarUrl       String?
   role            String           @default("USER")
   createdAt       DateTime         @default(now())
+  refreshToken    String?
 
   // Relations
   codeTemplates   CodeTemplate[]
@@ -180,4 +181,11 @@ model Tag {
   // Relations
   blogPosts       BlogPost[]        @relation("BlogPostTags")
   codeTemplates   CodeTemplate[]    @relation("CodeTemplateTags")
+}
+
+model InviteCode {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  isValid     Boolean  @default(true) // Mark invite codes as invalid after use if needed
+  createdAt   DateTime @default(now())
 }

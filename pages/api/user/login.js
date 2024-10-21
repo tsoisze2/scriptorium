@@ -1,40 +1,32 @@
 import prisma from "@/utils/db";
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { comparePassword, generateToken, generateTokenRefresh } from "@/utils/auth";
 
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
-    const { usernameOrEmail, password } = req.body;
+    const { username, password } = req.body;
 
-    try {
-      const user = await prisma.user.findFirst({
-        where: {
-          OR: [
-            { username: usernameOrEmail },
-            { email: usernameOrEmail },
-          ],
-        },
-      });
-
-      if (!user) {
-        return res.status(401).json({ error: 'Invalid credentials' });
-      }
-
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return res.status(401).json({ error: 'Invalid credentials' });
-      }
-
-      const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
-
-      res.status(200).json({ message: 'Login successful', token });
-    } catch (error) {
-      console.error('Error during login:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    if (!username || !password) {
+        return res.status(400).json({ message: "Please provide both username and password" });
     }
-  } else {
-    res.status(405).json({ error: 'Method not allowed' });
-  }
+
+    const user = await prisma.user.findUnique({
+        where: { username },
+    });
+
+    if (!user || !(await comparePassword(password, user.password))) {
+        return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    const accessToken = generateToken(user);
+    const refreshToken = generateTokenRefresh(user);
+
+    // Save the refresh token to the user record
+    await prisma.user.update({
+        where: { username },
+        data: { refreshToken },
+    });
+
+    return res.status(200).json({
+        accessToken,
+        refreshToken,
+    });
 }
