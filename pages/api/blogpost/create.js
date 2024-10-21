@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  // Destructure request body to extract title, description, tags, and content
+  // Destructure request body to extract title, description, tags (as a string), and content
   const { title, description, tags, content } = req.body;
 
   // Check if essential fields are provided
@@ -25,8 +25,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Title, description, and content are required" });
   }
 
-  // Ensure tags is an array or set it to an empty array if not provided
-  const tagsArray = tags && Array.isArray(tags) ? tags : [];
+  // Ensure that the tag is a string and trim any extra spaces
+  const singleTag = tags ? tags.trim() : '';
 
   try {
     // Create a new blog post with Prisma
@@ -39,10 +39,10 @@ export default async function handler(req, res) {
           connect: { username: user.username },  // Connect the post to the existing user by username
         },
         tags: {
-          connectOrCreate: tagsArray.map(tag => ({
-            where: { name: tag },  // Check if tag exists
-            create: { name: tag }  // Create tag if it doesn't exist
-          })),
+          connectOrCreate: {
+            where: { name: singleTag },  // Check if the single tag exists
+            create: { name: singleTag }  // Create the tag if it doesn't exist
+          },
         },
       },
     });
