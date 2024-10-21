@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     }
 
     // Validate phone number (optional)
-    if (phoneNum && !isValidPhone(phoneNum)) {
+    if (phoneNum && !isValidPhoneNumber(phoneNum)) {
       return res.status(400).json({ error: "Invalid phone number format" });
     }
 
@@ -44,12 +44,13 @@ export default async function handler(req, res) {
     }
 
     // Check if the email already exists
-    const existingUser = await prisma.user.findFirst({
-      where: { email: email },
-    });
-
-    if (existingUser) {
-      return res.status(409).json({ error: "Email already taken" });
+    if (email) {
+      const existingUser = await prisma.user.findFirst({
+        where: { email: email },
+      });
+      if (existingUser) {
+        return res.status(409).json({ error: "Email already taken" });
+      }
     }
 
     // Prepare data to update
@@ -71,6 +72,14 @@ export default async function handler(req, res) {
       const updatedUser = await prisma.user.update({
         where: { username: user.username }, // Identifying the user by username
         data: updateData,
+        select: {
+          username: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          phoneNum: true,
+          avatarUrl: true,
+        },
       });
 
       return res.status(200).json(updatedUser);
