@@ -9,29 +9,31 @@ export default async function handler(req, res) {
   }
 
   const token = req.headers.authorization?.split(" ")[1];
-  const user = verifyToken(token); // Extract user from JWT
+  const user = verifyToken(token);
 
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const { title, description, tags } = req.body;
+  const { title, explanation, tags, code, language } = req.body;
 
-  if (!title || !description) {
-    return res.status(400).json({ error: "Title and description are required" });
+  if (!title || !code || !language) {
+    return res.status(400).json({ error: "Title, code, and language are required" });
   }
 
   try {
-    const post = await prisma.blogPost.create({
+    const template = await prisma.codeTemplate.create({
       data: {
         title,
-        description,
+        explanation,
         tags,
-        authorId: user.id,  
+        code,
+        language,
+        authorId: user.id,
       },
     });
-    return res.status(201).json(post);
+    return res.status(201).json(template);
   } catch (error) {
-    return res.status(500).json({ error: "Failed to create blog post" });
+    return res.status(500).json({ error: "Failed to create template" });
   }
 }
