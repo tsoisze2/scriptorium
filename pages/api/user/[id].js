@@ -1,4 +1,4 @@
-// pages/api/report/comment/[id].js
+// pages/api/user/[id].js
 
 import prisma from "@/utils/db";
 
@@ -12,22 +12,22 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      // Fetch the report by its ID
-      const report = await prisma.reportComment.findUnique({
+      // Fetch the user by its ID
+      const user = await prisma.user.findUnique({
         where: {
           id: Number(id),  // Convert the id from query string to a number
         },
       });
 
-      if (!report) {
-        return res.status(404).json({ error: 'Report not found' });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
       }
 
-      // Return the report data as JSON
-      return res.status(200).json(report);
+      // Return the user data as JSON
+      return res.status(200).json(user);
     } catch (error) {
-      console.error('Error fetching report:', error);
-      return res.status(500).json({ error: 'Failed to retrieve report' });
+      console.error('Error fetching user:', error);
+      return res.status(500).json({ error: 'Failed to retrieve user' });
     }
   } else {
     // Handle other HTTP methods

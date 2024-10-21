@@ -4,7 +4,7 @@ import prisma from "@/utils/db";
 import { verifyTokenMdw } from "@/utils/auth";
 
 export default async function handler(req, res) {
-  if (req.method === 'PATCH') {
+  if (req.method === 'PUT') {
     const { replyId } = req.body;
 
     // Validate request body

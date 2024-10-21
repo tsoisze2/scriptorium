@@ -17,11 +17,6 @@ export default async function handler(req, res) {
         where: {
           id: Number(id),  // Convert the id from query string to a number
         },
-        include: {
-          author: true,
-          blogPost: true,
-          content: true,
-        },
       });
 
       if (!report) {
