@@ -38,6 +38,18 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'User not found' });
       }
 
+      // Check if the user has already rated this comment
+      const existingRating = await prisma.ratingComment.findFirst({
+        where: {
+          authorId: loggedInUser.id,
+          blogPostId: Number(commentId),
+        },
+      });
+
+      if (existingRating) {
+        return res.status(409).json({ error: 'You have already rated this comment' });
+      }
+
       // Create a new rating
       const newRating = await prisma.ratingComment.create({
         data: {

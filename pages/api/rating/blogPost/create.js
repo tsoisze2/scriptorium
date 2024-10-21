@@ -27,7 +27,6 @@ export default async function handler(req, res) {
       return res.status(404).json({ message: 'blogPost ID does not exist' });
     }
 
-
     const isUpvote = upvote === "true";
 
     try {
@@ -39,6 +38,18 @@ export default async function handler(req, res) {
 
       if (!loggedInUser) {
         return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Check if the user has already rated this blog post
+      const existingRating = await prisma.ratingBlogPost.findFirst({
+        where: {
+          authorId: loggedInUser.id,
+          blogPostId: Number(blogPostId),
+        },
+      });
+
+      if (existingRating) {
+        return res.status(409).json({ error: 'You have already rated this blog post' });
       }
 
       // Create a new rating
