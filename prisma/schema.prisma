@@ -141,6 +141,7 @@ model RatingComment {
 model ReportBlogPost {
   id              Int               @id @default(autoincrement())
   content         String
+  resolved        Boolean           @default(false)
 
   // Foreign key relation to User
   authorId        Int
@@ -153,6 +154,7 @@ model ReportBlogPost {
 model ReportComment {
   id              Int               @id @default(autoincrement())
   content         String
+  resolved        Boolean           @default(false)
 
   // Foreign key relation to User
   authorId        Int
@@ -165,6 +167,7 @@ model ReportComment {
 model ReportReply {
   id              Int               @id @default(autoincrement())
   content         String
+  resolved        Boolean           @default(false)
 
   // Foreign key relation to User
   authorId        Int
