@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { verifyToken } from "@/utils/auth";
+import { verifyTokenMdw } from "@/utils/auth";  
 
 const prisma = new PrismaClient();
 
@@ -8,8 +8,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const token = req.headers.authorization?.split(" ")[1];
-  const user = verifyToken(token);
+  const user = verifyTokenMdw(req);  
 
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
