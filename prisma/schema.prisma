@@ -21,6 +21,7 @@ model User {
   refreshToken    String?
 
   // Relations
+  blogPosts       BlogPost[]
   codeTemplates   CodeTemplate[]
   comments        Comment[]
   replies         Reply[]
@@ -58,9 +59,13 @@ model BlogPost {
   createdAt       DateTime         @default(now())
   lastModified    DateTime         @default(now())
 
+  // Foreign key relation to User
+  authorId        Int
+  author          User             @relation(fields: [authorId], references: [id])
+
   // Foreign key relation to CodeTemplate
-  codeTemplateId  Int
-  codeTemplate    CodeTemplate     @relation(fields: [codeTemplateId], references: [id])
+  codeTemplateId  Int?
+  codeTemplate    CodeTemplate?    @relation(fields: [codeTemplateId], references: [id])
 
   // Relations
   tags            Tag[]            @relation("BlogPostTags")
@@ -81,7 +86,7 @@ model Comment {
 
   // Foreign key relation to BlogPost
   blogPostId      Int
-  blogPost        BlogPost          @relation(fields: [blogPostId], references: [id])
+  blogPost        BlogPost          @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
 
   // Relations
   replies         Reply[]
@@ -101,7 +106,7 @@ model Reply {
 
   // Foreign key relation to Comment
   commentId       Int
-  comment         Comment           @relation(fields: [commentId], references: [id])
+  comment         Comment           @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   // Self-referencing relation for nested replies
   replyingToId    Int?
@@ -122,7 +127,7 @@ model RatingBlogPost {
 
   // Foreign key relations
   blogPostId      Int 
-  blogPost        BlogPost          @relation(fields: [blogPostId], references: [id])
+  blogPost        BlogPost          @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
 }
 
 model RatingComment {
@@ -135,7 +140,7 @@ model RatingComment {
 
   // Foreign key relations
   commentId       Int 
-  comment         Comment           @relation(fields: [commentId], references: [id])
+  comment         Comment           @relation(fields: [commentId], references: [id], onDelete: Cascade)
 }
 
 model ReportBlogPost {
@@ -148,7 +153,7 @@ model ReportBlogPost {
   author          User              @relation(fields: [authorId], references: [id])
 
   blogPostId      Int
-  blogPost        BlogPost          @relation(fields: [blogPostId], references: [id])
+  blogPost        BlogPost          @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
 }
 
 model ReportComment {
@@ -161,7 +166,7 @@ model ReportComment {
   author          User              @relation(fields: [authorId], references: [id])
 
   commentId       Int 
-  comment         Comment           @relation(fields: [commentId], references: [id])
+  comment         Comment           @relation(fields: [commentId], references: [id], onDelete: Cascade)
 }
 
 model ReportReply {
@@ -174,7 +179,7 @@ model ReportReply {
   author          User              @relation(fields: [authorId], references: [id])
 
   replyId         Int
-  reply           Reply             @relation(fields: [replyId], references: [id])
+  reply           Reply             @relation(fields: [replyId], references: [id], onDelete: Cascade)
 }
 
 model Tag {

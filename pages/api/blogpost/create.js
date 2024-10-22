@@ -1,58 +1,85 @@
-import { PrismaClient } from "@prisma/client";
-import { verifyTokenMdw } from "@/utils/auth";  
-
-const prisma = new PrismaClient();
+import prisma from "@/utils/db";
+import { verifyTokenMdw } from "@/utils/auth";
+import { convertTagsToArray } from "@/utils/format";  // Assuming we already have this utility function
 
 export default async function handler(req, res) {
-  // Allow only POST method
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method === 'POST') {
+    const { title, description, tags, content, codeTemplateId } = req.body;
 
-  // Verify the user token and retrieve the user
-  const user = verifyTokenMdw(req); 
+    // Validate the request body
+    if (!title || !description || !content || (codeTemplateId && isNaN(Number(codeTemplateId)))) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
 
-  // If token verification fails, return unauthorized error
-  if (!user) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
+    // Validate user
+    const user = verifyTokenMdw(req);
+    if (!user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
 
-  // Destructure request body to extract title, description, tags (as a string), and content
-  const { title, description, tags, content } = req.body;
+    try {
+      // Get the logged-in user's ID
+      const loggedInUser = await prisma.user.findUnique({
+        where: { username: user.username },
+        select: { id: true },
+      });
 
-  // Check if essential fields are provided
-  if (!title || !description || !content) {
-    return res.status(400).json({ error: "Title, description, and content are required" });
-  }
+      if (!loggedInUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
 
-  // Ensure that the tag is a string and trim any extra spaces
-  const singleTag = tags ? tags.trim() : '';
+      // Handle tags if provided
+      let tagsToConnect = [];
+      if (tags) {
+        const tagsArray = convertTagsToArray(tags);
+        tagsToConnect = await Promise.all(
+          tagsArray.map(async (tagName) => {
+            const existingTag = await prisma.tag.findUnique({
+              where: { name: tagName },
+            });
 
-  try {
-    // Create a new blog post with Prisma
-    const post = await prisma.blogPost.create({
-      data: {
-        title,
-        description,
-        content,
-        author: {
-          connect: { username: user.username },  // Connect the post to the existing user by username
-        },
-        tags: {
-          connectOrCreate: {
-            where: { name: singleTag },  // Check if the single tag exists
-            create: { name: singleTag }  // Create the tag if it doesn't exist
+            if (existingTag) {
+              return { id: existingTag.id }; // If tag exists, return its ID to connect
+            } else {
+              const newTag = await prisma.tag.create({
+                data: { name: tagName },
+              });
+              return { id: newTag.id }; // Return the ID of the newly created tag
+            }
+          })
+        );
+      }
+
+      // Create the blog post
+      const newBlogPost = await prisma.blogPost.create({
+        data: {
+          title: title,
+          description: description,
+          content: content,
+          author: {
+            connect: { id: loggedInUser.id }, // Link to the author by their ID
           },
+          ...(codeTemplateId && {
+            codeTemplate: {
+              connect: { id: Number(codeTemplateId) }
+            },
+          }),
+          ...(tagsToConnect.length > 0 && {
+            tags: {
+              connect: tagsToConnect, // Connect the blog post with the tags
+            },
+          }),
         },
-      },
-    });
+      });
 
-    // Respond with success and the created post data
-    return res.status(201).json({ message: "Post created successfully", post });
-
-  } catch (error) {
-    // Handle any errors that occur during the post creation process
-    console.error("Error creating post:", error);
-    return res.status(500).json({ error: "Internal server error" });
+      // Return the newly created blog post
+      return res.status(201).json(newBlogPost);
+    } catch (error) {
+      console.error('Error creating blog post:', error);
+      return res.status(500).json({ error: 'Failed to create blog post' });
+    }
+  } else {
+    // Handle other HTTP methods
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 }
