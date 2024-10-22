@@ -2,8 +2,7 @@
 
 import prisma from "@/utils/db";
 import { convertTagsToArray } from "@/utils/format";
-
-const pageSize = 5;
+import { pageSize } from "@/config";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
@@ -29,17 +28,18 @@ export default async function handler(req, res) {
                 }
             }
 
-
             if (tags) {
-                const tagArray = convertTagsToArray(tags);
+                const tagsArray = convertTagsToArray(tags);
 
-                searchConditions.tags = {
-                    some: {
-                        name: {
-                            in: tagArray,
+                const tagConditions = tagsArray.map(tag => ({
+                    tags: {
+                        some: {
+                            name: tag,
                         },
                     },
-                }
+                }));
+
+                searchConditions.AND = tagConditions;
             }
 
 

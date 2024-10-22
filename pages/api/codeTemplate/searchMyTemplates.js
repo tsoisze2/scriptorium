@@ -1,8 +1,7 @@
 import prisma from "@/utils/db";
 import { verifyTokenMdw } from "@/utils/auth";
 import { convertTagsToArray } from "@/utils/format";
-
-const pageSize = 5;
+import { pageSize } from "@/config";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
@@ -30,7 +29,7 @@ export default async function handler(req, res) {
             const loggedInUser = await prisma.user.findUnique({
                 where: { username: user.username },
                 select: { id: true },
-              });
+            });
 
             // Build dynamic query filters based on which parameters are provided
             const searchConditions = {
@@ -45,19 +44,19 @@ export default async function handler(req, res) {
                 }
             }
 
-
             if (tags) {
-                const tagArray = convertTagsToArray(tags);
+                const tagsArray = convertTagsToArray(tags);
 
-                searchConditions.tags = {
-                    some: {
-                        name: {
-                            in: tagArray,
+                const tagConditions = tagsArray.map(tag => ({
+                    tags: {
+                        some: {
+                            name: tag,
                         },
                     },
-                }
-            }
+                }));
 
+                searchConditions.AND = tagConditions;
+            }
 
             if (content) {
                 searchConditions.OR = [
