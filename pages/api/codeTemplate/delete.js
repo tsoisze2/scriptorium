@@ -1,37 +1,61 @@
-import { PrismaClient } from "@prisma/client";
-import { verifyToken } from "@/utils/auth";
+// pages/api/codeTemplate/delete.js
 
-const prisma = new PrismaClient();
+import prisma from "@/utils/db";
+import { verifyTokenMdw } from "@/utils/auth"; 
 
 export default async function handler(req, res) {
-  if (req.method !== "DELETE") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method === 'DELETE') {
+    const { codeTemplateId } = req.body; 
 
-  const token = req.headers.authorization?.split(" ")[1];
-  const user = verifyToken(token);
-
-  if (!user) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-
-  const { templateId } = req.query;
-
-  try {
-    const template = await prisma.codeTemplate.findUnique({ where: { id: templateId } });
-
-    if (!template) {
-      return res.status(404).json({ error: "Template not found" });
+    // Validate codeTemplate ID
+    if (!codeTemplateId || isNaN(Number(codeTemplateId))) {
+      return res.status(400).json({ error: 'Invalid or missing codeTemplate ID' });
     }
 
-    if (template.authorId !== user.id && !user.isAdmin) {
-      return res.status(403).json({ error: "Permission denied" });
+    // Verify the user making the request
+    const user = verifyTokenMdw(req);
+    if (!user) {
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    await prisma.codeTemplate.delete({ where: { id: templateId } });
+    try {
+      // Fetch the codeTemplate to ensure it exists and check the author
+      const codeTemplate = await prisma.codeTemplate.findUnique({
+        where: { id: Number(codeTemplateId) },
+        select: { authorId: true }, // Only need the authorId to compare
+      });
 
-    return res.status(200).json({ message: "Template deleted" });
-  } catch (error) {
-    return res.status(500).json({ error: "Failed to delete template" });
+      if (!codeTemplate) {
+        return res.status(404).json({ error: 'codeTemplate not found' });
+      }
+
+      // Check if the logged-in user is the author of the codeTemplate
+      const loggedInUser = await prisma.user.findUnique({
+        where: { username: user.username },
+        select: { id: true },
+      });
+      if (codeTemplate.authorId !== loggedInUser.id) {
+        return res.status(403).json({ error: 'You are not the author of this codeTemplate' });
+      }
+
+      // Set the codeTemplate field of all blogPosts of this codeTemplate to null
+      await prisma.blogPost.updateMany({
+        where: { codeTemplateId: Number(codeTemplateId) },
+        data: { codeTemplateId: null },
+      });
+
+      // Delete the codeTemplate itself
+      await prisma.codeTemplate.delete({
+        where: { id: Number(codeTemplateId) },
+      });
+
+      return res.status(200).json({ message: 'CodeTemplate deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting codeTemplate:', error);
+      return res.status(500).json({ error: 'Failed to delete codeTemplate' });
+    }
+  } else {
+    // Handle other HTTP methods
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 }

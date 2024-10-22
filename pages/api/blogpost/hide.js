@@ -1,36 +1,47 @@
-import { PrismaClient } from "@prisma/client";
-import { verifyToken } from "@/utils/auth";
+// pages/api/blogpost/hide.js
 
-const prisma = new PrismaClient();
+import prisma from "@/utils/db";
+import { verifyTokenMdw } from "@/utils/auth";
 
 export default async function handler(req, res) {
-  if (req.method !== "PATCH") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method === 'PUT') {
+    const { blogPostId } = req.body;
 
-  const token = req.headers.authorization?.split(" ")[1];
-  const user = verifyToken(token);
-
-  if (!user || !user.isAdmin) {
-    return res.status(403).json({ error: "Permission denied" });
-  }
-
-  const { postId } = req.query;
-
-  try {
-    const post = await prisma.blogPost.findUnique({ where: { id: postId } });
-
-    if (!post) {
-      return res.status(404).json({ error: "Blog post not found" });
+    // Validate request body
+    if (!blogPostId || isNaN(Number(blogPostId))) {
+      return res.status(400).json({ error: 'Invalid blogPost ID' });
     }
 
-    await prisma.blogPost.update({
-      where: { id: postId },
-      data: { isHidden: true },
+    // Verify the user is an ADMIN
+    const user = verifyTokenMdw(req);
+    if (!user || user.role !== "ADMIN") {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Check if the blogPost exists
+    const blogPost = await prisma.blogPost.findUnique({
+      where: { id: Number(blogPostId) },
     });
 
-    return res.status(200).json({ message: "Blog post hidden" });
-  } catch (error) {
-    return res.status(500).json({ error: "Failed to hide blog post" });
+    if (!blogPost) {
+      return res.status(404).json({ error: 'blogPost not found' });
+    }
+
+    try {
+      // Hide the blogPost
+      await prisma.blogPost.update({
+        where: { id: Number(blogPostId) },
+        data: { visibleToPublic: false },
+      });
+
+      // Return success response
+      return res.status(200).json({ message: 'BlogPost hidden successfully' });
+    } catch (error) {
+      console.error('Error hiding blogPost:', error);
+      return res.status(500).json({ error: 'Failed to hide blogPost' });
+    }
+  } else {
+    // Handle other HTTP methods
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 }

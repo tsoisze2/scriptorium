@@ -1,6 +1,6 @@
 import prisma from "@/utils/db";
 import { verifyTokenMdw } from "@/utils/auth";
-import { convertTagsToArray } from "@/utils/format";  // Assuming we already have this utility function
+import { convertTagsToArray } from "@/utils/format"; 
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {

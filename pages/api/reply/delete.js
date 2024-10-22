@@ -52,11 +52,6 @@ export default async function handler(req, res) {
         data: { replyingToId: null },
       });
 
-      // Delete associated reports for this reply
-      await prisma.reportReply.deleteMany({
-        where: { replyId: Number(replyId) },
-      });
-
       // Delete the reply itself
       await prisma.reply.delete({
         where: { id: Number(replyId) },
