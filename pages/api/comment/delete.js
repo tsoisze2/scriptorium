@@ -38,21 +38,6 @@ export default async function handler(req, res) {
         return res.status(403).json({ error: 'You are not the author of this comment' });
       }
 
-      // Delete associated replies for this comment
-      await prisma.reply.deleteMany({
-        where: { commentId: Number(commentId) },
-      });
-
-      // Delete associated ratings for this comment
-      await prisma.ratingComment.deleteMany({
-        where: { commentId: Number(commentId) },
-      });
-
-      // Delete associated reports for this comment
-      await prisma.reportComment.deleteMany({
-        where: { commentId: Number(commentId) }
-      });
-
       // Delete the comment itself
       await prisma.comment.delete({
         where: { id: Number(commentId) },
