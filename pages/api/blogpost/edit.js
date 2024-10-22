@@ -36,9 +36,15 @@ export default async function handler(req, res) {
         where: { id: Number(blogPostId) },
         select: { authorId: true }, // Only need the authorId to compare
       });
+
       // Check if the logged-in user is the author of the blogPost
       if (blogPost.authorId !== loggedInUser.id) {
         return res.status(403).json({ error: 'You are not the author of this blogPost' });
+      }
+
+      // Check if the blogPost is visible to public
+      if (blogPost.visibleToPublic === false) {
+        return res.status(401).json({ error: 'You are not allowed to modified a locked blog post' });
       }
 
       if (codeTemplateId) {
