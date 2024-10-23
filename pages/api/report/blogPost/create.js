@@ -36,6 +36,18 @@ export default async function handler(req, res) {
                 return res.status(404).json({ error: 'User not found' });
             }
 
+            // Check if the user has already reported this blog post
+            const existingReport = await prisma.reportBlogPost.findFirst({
+                where: {
+                    authorId: loggedInUser.id,
+                    blogPostId: Number(blogPostId),
+                },
+            });
+
+            if (existingReport) {
+                return res.status(409).json({ error: 'You have already reported this blog post' });
+            }
+
             // Create a new report
             const newReport = await prisma.reportBlogPost.create({
                 data: {
