@@ -68,26 +68,35 @@ export default async function handler(req, res) {
             // Calculate pagination offsets
             const skip = (currentPage - 1) * pageSize; // Skip records for previous pages
 
-            // Execute the query with pagination
+            // Execute the query to fetch all matching blog posts (without pagination yet)
             const blogPosts = await prisma.blogPost.findMany({
                 where: searchConditions,
                 include: {
                     tags: true, // Include associated tags
                     codeTemplate: true, // Include associated code template
-                    ratings: true, // Include ratings for sorting
+                    ratings: true, // Include associated ratings to calculate the score
                 },
-                skip: skip,
-                take: pageSize, // Limit the number of results to pageSize
             });
 
-            // Calculate total pages
-            const totalPages = Math.ceil(totalBlogPosts / pageSize);
+            // Calculate the rating score (upvotes - downvotes) for each blog post
+            const sortedBlogPosts = blogPosts
+                .map(post => {
+                    const upvotes = post.ratings.filter(rating => rating.upvote).length;
+                    const downvotes = post.ratings.length - upvotes;
+                    const score = upvotes - downvotes;
+
+                    return { ...post, score };
+                })
+                .sort((a, b) => b.score - a.score); // Sort by score in descending order
+
+            // Now apply pagination after sorting
+            const paginatedBlogPosts = sortedBlogPosts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
             // Send the paginated response
             res.status(200).json({
-                blogPosts,
-                totalBlogPosts,
-                totalPages,
+                blogPosts: paginatedBlogPosts,
+                totalBlogPosts: blogPosts.length, // Total number of posts before pagination
+                totalPages: Math.ceil(blogPosts.length / pageSize), // Total number of pages
                 currentPage,
             });
         } catch (error) {
