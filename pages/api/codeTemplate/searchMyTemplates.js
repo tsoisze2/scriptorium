@@ -5,7 +5,7 @@ import { pageSize } from "@/config";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        const { title, tags, content, language, page } = req.body; // Extract query parameters
+        const { title, tags, content, language, page = 1} = req.body; // Extract query parameters
 
 
         // Verify the user making the request
@@ -15,14 +15,11 @@ export default async function handler(req, res) {
         }
 
         // Validate page to be a number
-        if (page && isNaN(Number(page))) {
+        if (isNaN(Number(page))) {
             return res.status(400).json({ error: 'Invalid page number provided' });
         }
 
-        let currentPage = 1;
-        if (page) {
-            currentPage = Number(page);
-        }
+        const currentPage = Number(page);
 
         try {
             // Get the logged in user

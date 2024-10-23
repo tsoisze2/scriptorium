@@ -1,14 +1,12 @@
-// pages/api/codeTemplate/search.js
-
 import prisma from "@/utils/db";
 import { convertTagsToArray } from "@/utils/format";
 import { pageSize } from "@/config";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        const { title, tags, content, language, page = 1 } = req.body; // Extract query parameters, including tags
+        const { title, content, tags, codeTemplateId, page = 1 } = req.body; // Extract query parameters
 
-        // Validate page to be a number
+        // Validate page number
         if (isNaN(Number(page))) {
             return res.status(400).json({ error: 'Invalid page number provided' });
         }
@@ -19,12 +17,30 @@ export default async function handler(req, res) {
             // Build dynamic query filters based on which parameters are provided
             const searchConditions = {};
 
+            // Title condition (case-insensitive)
             if (title) {
                 searchConditions.title = {
                     contains: title,
                 }
             }
 
+            // Content condition (search in both description and content)
+            if (content) {
+                searchConditions.OR = [
+                    {
+                        description: {
+                            contains: content,
+                        },
+                    },
+                    {
+                        content: {
+                            contains: content,
+                        },
+                    },
+                ]
+            }
+
+            // Tags condition (search for posts with matching tags)
             if (tags) {
                 const tagsArray = convertTagsToArray(tags);
 
@@ -39,30 +55,13 @@ export default async function handler(req, res) {
                 searchConditions.AND = tagConditions;
             }
 
-
-            if (content) {
-                searchConditions.OR = [
-                    {
-                        code: {
-                            contains: content,
-                        },
-                    },
-                    {
-                        explanation: {
-                            contains: content,
-                        },
-                    },
-                ]
+            // CodeTemplateId condition (search for posts linked to a specific codeTemplate by ID)
+            if (codeTemplateId) {
+                searchConditions.codeTemplateId = codeTemplateId; // Exact match on associated code template ID
             }
 
-            if (language) {
-                searchConditions.language = {
-                    equals: language,
-                }
-            }
-
-            // Get the total count of matching templates
-            const totalTemplates = await prisma.codeTemplate.count({
+            // Get the total count of matching blog posts
+            const totalBlogPosts = await prisma.blogPost.count({
                 where: searchConditions,
             });
 
@@ -70,27 +69,29 @@ export default async function handler(req, res) {
             const skip = (currentPage - 1) * pageSize; // Skip records for previous pages
 
             // Execute the query with pagination
-            const templates = await prisma.codeTemplate.findMany({
+            const blogPosts = await prisma.blogPost.findMany({
                 where: searchConditions,
                 include: {
                     tags: true, // Include associated tags
+                    codeTemplate: true, // Include associated code template
+                    ratings: true, // Include ratings for sorting
                 },
                 skip: skip,
                 take: pageSize, // Limit the number of results to pageSize
             });
 
             // Calculate total pages
-            const totalPages = Math.ceil(totalTemplates / pageSize);
+            const totalPages = Math.ceil(totalBlogPosts / pageSize);
 
             // Send the paginated response
             res.status(200).json({
-                templates,
-                totalTemplates,
+                blogPosts,
+                totalBlogPosts,
                 totalPages,
                 currentPage,
             });
         } catch (error) {
-            console.error('Error searching templates:', error);
+            console.error('Error searching blog posts:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
     } else {
