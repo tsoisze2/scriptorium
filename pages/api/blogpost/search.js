@@ -11,6 +11,11 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Invalid page number provided' });
         }
 
+        // Validate codeTemplateId
+        if (codeTemplateId && isNaN(Number(codeTemplateId))) {
+            return res.status(400).json({ error: 'Invalid codeTemplateId provided' });
+        }
+
         const currentPage = Number(page);
 
         try {
@@ -57,7 +62,7 @@ export default async function handler(req, res) {
 
             // CodeTemplateId condition (search for posts linked to a specific codeTemplate by ID)
             if (codeTemplateId) {
-                searchConditions.codeTemplateId = codeTemplateId; // Exact match on associated code template ID
+                searchConditions.codeTemplateId = Number(codeTemplateId); // Exact match on associated code template ID
             }
 
             // Get the total count of matching blog posts
