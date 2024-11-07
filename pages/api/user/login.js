@@ -1,3 +1,4 @@
+// pages/api/user/login.js
 import prisma from "@/utils/db";
 import { comparePassword, generateToken, generateTokenRefresh } from "@/utils/auth";
 
@@ -13,7 +14,7 @@ export default async function handler(req, res) {
             where: { username },
         });
 
-        if (!user || !(await comparePassword(password, user.password))) {
+        if (!user.username || !(await comparePassword(password, user.password))) {
             return res.status(401).json({ error: "Invalid credentials" });
         }
 

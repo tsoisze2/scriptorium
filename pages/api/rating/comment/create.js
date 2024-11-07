@@ -42,7 +42,7 @@ export default async function handler(req, res) {
       const existingRating = await prisma.ratingComment.findFirst({
         where: {
           authorId: loggedInUser.id,
-          blogPostId: Number(commentId),
+          commentId: Number(commentId),
         },
       });
 

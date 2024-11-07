@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const { templateId } = req.query;
+  const { templateId } = req.body;
 
   try {
     const template = await prisma.codeTemplate.findUnique({ where: { id: templateId } });

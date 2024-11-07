@@ -1,3 +1,4 @@
+// pages/api/user/logout.js
 import prisma from "@/utils/db";
 import { verifyTokenMdw } from "@/utils/auth"; // Middleware to verify the user
 

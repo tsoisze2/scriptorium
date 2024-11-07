@@ -1,3 +1,4 @@
+// pages/api/report/blogPost/resolve.js
 import prisma from "@/utils/db";
 import { verifyTokenMdw } from "@/utils/auth";
 
