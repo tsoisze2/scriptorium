@@ -16,25 +16,38 @@ export default async function handler(req, res) {
 
   const { templateId } = req.body;
 
+  // Verify templateId
+  if (!templateId || isNaN(Number(templateId))) {
+    return res.status(400).json({ error: 'Invalid or missing template ID' });
+  }
+
   try {
-    const template = await prisma.codeTemplate.findUnique({ where: { id: templateId } });
+    const template = await prisma.codeTemplate.findUnique({ where: { id: Number(templateId) } });
 
     if (!template) {
-      return res.status(404).json({ error: "Template not found" });
+      return res.status(404).json({ error: "Code template not found" });
     }
+
+    // Set the authorId 
+    const loggedInUser = await prisma.user.findUnique({
+      where: { username: user.username },
+      select: { id: true },
+    });
 
     const forkedTemplate = await prisma.codeTemplate.create({
       data: {
-        title: `${template.title} (forked)`,
-        explanation: template.explanation,
-        tags: template.tags,
+        title: `${template.title} (forked)`, 
         code: template.code,
+        explanation: template.explanation,
         language: template.language,
-        authorId: user.id,
+        author: {
+          connect: { id: loggedInUser.id }, // Link to the author by their ID
+        },
       },
     });
 
     return res.status(201).json(forkedTemplate);
+    
   } catch (error) {
     return res.status(500).json({ error: "Failed to fork template" });
   }
