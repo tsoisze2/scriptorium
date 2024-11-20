@@ -1,57 +1,96 @@
-// pages/api/executecode.js
+import { exec } from 'child_process';
+import fs from 'fs-extra';
+import path from 'path';
+import { promisify } from 'util';
 
-import { exec } from "child_process";
-import fs from "fs";
-import path from "path";
-import { highlight } from "highlight.js"; // for syntax highlighting
+const ep = promisify(exec);
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { code, language, input } = req.body;
+  const { code, language , stdin } = req.body;
 
-  const supportedLanguages = ["python", "javascript", "java", "c", "cpp"];
-  if (!supportedLanguages.includes(language)) {
-    return res.status(400).json({ error: `Unsupported language: ${language}` });
+  const validLang = ['python', 'javascript', 'java', 'c', 'cpp'];
+  if (!validLang.includes(language)) {
+    return res.status(400).json({ error: 'Language not supported' });
   }
 
-  // Syntax highlighting
-  const highlightedCode = highlight(language, code).value;
+  const tempDir = path.join(process.cwd(), 'temp');
+  await fs.ensureDir(tempDir); // ensure temp exists
 
-  // Set up file paths and commands for each language
-  const fileExtension = language === "python" ? "py" : language === "javascript" ? "js" : language;
-  const tempFileName = `temp.${fileExtension}`;
-  const tempFilePath = path.join("/tmp", tempFileName);
+  const codefp = path.join(tempDir, `main${getExt(language)}`);
+  const infp = path.join(tempDir, 'input.txt');
 
-  const commands = {
-    python: `python3 ${tempFilePath}`,
-    javascript: `node ${tempFilePath}`,
-    java: `javac ${tempFileName} && java ${tempFileName.replace(".java", "")}`,
-    c: `gcc ${tempFileName} -o temp.out && ./temp.out`,
-    cpp: `g++ ${tempFileName} -o temp.out && ./temp.out`,
-  };
-
-  // Write code to a temporary file
-  fs.writeFileSync(tempFilePath, code);
+  await fs.writeFile(codefp, code);
+  await fs.writeFile(infp, stdin || '');
 
   try {
-    // Run the command with the user's code and stdin (if provided)
-    exec(commands[language], { input: input || "" }, (error, stdout, stderr) => {
-      const response = {
-        output: stdout || "",
-        errors: stderr || (error ? error.message : ""),
-        warnings: "", // Warnings can be parsed if necessary
-        highlightedCode,
-      };
+    const command = getComm(language, codefp, infp);
 
-      res.status(200).json(response);
-    });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to execute code" });
-  } finally {
-    // Clean up: remove temp file
-    fs.unlinkSync(tempFilePath);
+    const { stdout, stderr } = await ep(command, { timeout: 5000, maxBuffer: 1024 * 1024 }); //time+mem limit
+
+    if (stderr) {
+      return res.status(200).json({ output: '', error: stderr });
+    }
+
+    res.status(200).json({ output: stdout, error: '' });
+  } 
+  
+  catch (error) {
+    if (error.killed || error.signal === 'SIGTERM') {
+      return res.status(500).json({ error: 'Execution timed out' });
+    }
+
+    res.status(500).json({ error: 'Error', details: error.message });
+
+  } 
+  
+  finally {
+    try {
+      await fs.remove(tempDir);
+    } 
+    catch (cleanErr) {
+      console.error('Failed cleanup', cleanErr);
+    }
+  }
+}
+
+// get file extension
+function getExt(lang) {
+  const ext = {
+    'python': '.py',
+    'javascript': '.js',
+    'java': '.java',
+    'c': '.c',
+    'cpp': '.cpp'
+  };
+  
+  return ext[lang];
+}
+
+// define the command 
+function getComm(lang, codefp, infp) {
+  const out = path.join(path.dirname(codefp), 'program');
+  
+  switch (lang) {
+    case 'python':
+      return `python3 ${codefp} < ${infp}`;
+    
+    case 'javascript':
+      return `node ${codefp} < ${infp}`;
+    
+    case 'java':
+      return `javac ${codefp} && java -cp ${path.dirname(codefp)} Main < ${infp}`;
+    
+    case 'c':
+      return `gcc ${codefp} -o ${out} && ${out} < ${infp}`;
+    
+    case 'cpp':
+      return `g++ ${codefp} -o ${out} && ${out} < ${infp}`;
+    
+    default:
+      throw new Error(`${lang} is not supported.`);
   }
 }
