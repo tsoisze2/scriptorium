@@ -1,12 +1,11 @@
-// /pages/api/codeTemplate/searchMyTemplate.js
+// /pages/api/rating/blogPost/searchMyRatings.js
 import prisma from "@/utils/db";
 import { verifyTokenMdw } from "@/utils/auth";
-import { convertTagsToArray } from "@/utils/format";
 import { pageSize } from "@/config";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        const { title, tags, content, language, page = 1} = req.body; // Extract query parameters
+        const { page = 1} = req.body; // Extract query parameters
 
 
         // Verify the user making the request
@@ -36,49 +35,9 @@ export default async function handler(req, res) {
                 }
             };
 
-            if (title) {
-                searchConditions.title = {
-                    contains: title,
-                }
-            }
-
-            if (tags) {
-                const tagsArray = convertTagsToArray(tags);
-
-                const tagConditions = tagsArray.map(tag => ({
-                    tags: {
-                        some: {
-                            name: tag,
-                        },
-                    },
-                }));
-
-                searchConditions.AND = tagConditions;
-            }
-
-            if (content) {
-                searchConditions.OR = [
-                    {
-                        code: {
-                            contains: content,
-                        },
-                    },
-                    {
-                        explanation: {
-                            contains: content,
-                        },
-                    },
-                ]
-            }
-
-            if (language) {
-                searchConditions.language = {
-                    equals: language,
-                }
-            }
 
             // Get the total count of matching templates
-            const totalTemplates = await prisma.codeTemplate.count({
+            const totalRatings = await prisma.ratingBlogPost.count({
                 where: searchConditions,
             });
 
@@ -86,27 +45,24 @@ export default async function handler(req, res) {
             const skip = (currentPage - 1) * pageSize; // Skip records for previous pages
 
             // Execute the query with pagination
-            const templates = await prisma.codeTemplate.findMany({
+            const ratings = await prisma.ratingBlogPost.findMany({
                 where: searchConditions,
-                include: {
-                    tags: true, // Include associated tags
-                },
                 skip: skip,
                 take: pageSize, // Limit the number of results to pageSize
             });
 
             // Calculate total pages
-            const totalPages = Math.ceil(totalTemplates / pageSize);
+            const totalPages = Math.ceil(totalRatings / pageSize);
 
             // Send the paginated response
             res.status(200).json({
-                templates,
-                totalTemplates,
+                ratings,
+                totalRatings,
                 totalPages,
                 currentPage,
             });
         } catch (error) {
-            console.error('Error searching templates:', error);
+            console.error('Error searching ratings:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
 
