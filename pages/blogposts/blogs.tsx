@@ -6,13 +6,12 @@ interface BlogPost {
   tags: string[];
   description: string;
   comments: string[];
-  rating: number | null; // Rating ranges from 1 to 5
+  score: number; // Net score (upvotes - downvotes)
 }
 
 const BlogPostsPage: React.FC = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [newComment, setNewComment] = useState<{ [key: number]: string }>({});
-  const [newRating, setNewRating] = useState<{ [key: number]: number | null }>({});
 
   // Simulating fetching data from an API
   useEffect(() => {
@@ -25,7 +24,7 @@ const BlogPostsPage: React.FC = () => {
           tags: ["React", "JavaScript"],
           description: "This is the first blogpost.",
           comments: [],
-          rating: null,
+          score: 0,
         },
         {
           id: 2,
@@ -33,7 +32,7 @@ const BlogPostsPage: React.FC = () => {
           tags: ["TypeScript", "Web Development"],
           description: "Learning TypeScript is fun!",
           comments: [],
-          rating: null,
+          score: 0,
         },
         {
           id: 3,
@@ -41,7 +40,7 @@ const BlogPostsPage: React.FC = () => {
           tags: ["CSS", "Design"],
           description: "Styling your apps beautifully.",
           comments: [],
-          rating: null,
+          score: 0,
         },
       ];
       setBlogPosts(data);
@@ -61,11 +60,20 @@ const BlogPostsPage: React.FC = () => {
     setNewComment({ ...newComment, [postId]: "" });
   };
 
-  const handleRating = (postId: number, rating: number) => {
+  const handleUpvote = (postId: number) => {
     setBlogPosts((prevPosts) =>
-      prevPosts.map((post) => (post.id === postId ? { ...post, rating } : post))
+      prevPosts.map((post) =>
+        post.id === postId ? { ...post, score: post.score + 1 } : post
+      )
     );
-    setNewRating({ ...newRating, [postId]: rating });
+  };
+
+  const handleDownvote = (postId: number) => {
+    setBlogPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId ? { ...post, score: post.score - 1 } : post
+      )
+    );
   };
 
   return (
@@ -95,26 +103,36 @@ const BlogPostsPage: React.FC = () => {
 
             {/* Rating Section */}
             <div style={{ marginBottom: "15px" }}>
-              <strong>Rating: </strong>
-              {post.rating ? `${post.rating}/5` : "No rating yet"}
-              <div>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => handleRating(post.id, star)}
-                    style={{
-                      padding: "5px 10px",
-                      margin: "0 5px",
-                      backgroundColor: post.rating === star ? "#007BFF" : "#ccc",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {star}
-                  </button>
-                ))}
+              <strong>Score: </strong>
+              {post.score}
+              <div style={{ marginTop: "10px" }}>
+                <button
+                  onClick={() => handleUpvote(post.id)}
+                  style={{
+                    padding: "5px 10px",
+                    marginRight: "10px",
+                    backgroundColor: "#28a745",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Upvote
+                </button>
+                <button
+                  onClick={() => handleDownvote(post.id)}
+                  style={{
+                    padding: "5px 10px",
+                    backgroundColor: "#dc3545",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Downvote
+                </button>
               </div>
             </div>
 
@@ -153,7 +171,7 @@ const BlogPostsPage: React.FC = () => {
                     padding: "10px 15px",
                     fontSize: "14px",
                     color: "#fff",
-                    backgroundColor: "#28a745",
+                    backgroundColor: "#007BFF",
                     border: "none",
                     borderRadius: "4px",
                     cursor: "pointer",
