@@ -1,4 +1,4 @@
-// pages/api/codeTemplate/[id].js
+// pages/api/blogpost/[id].js
 
 import prisma from "@/utils/db";
 
@@ -13,21 +13,21 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       // Fetch the comment by its ID
-      const template = await prisma.codeTemplate.findUnique({
+      const blogPost = await prisma.blogPost.findUnique({
         where: {
           id: Number(id),  // Convert the id from query string to a number
         },
       });
 
-      if (!template) {
-        return res.status(404).json({ error: 'Code Template not found' });
+      if (!blogPost) {
+        return res.status(404).json({ error: 'Blog Post not found' });
       }
 
       // Return the template data as JSON
-      return res.status(200).json(template);
+      return res.status(200).json(blogPost);
     } catch (error) {
-      console.error('Error fetching template:', error);
-      return res.status(500).json({ error: 'Failed to retrieve template' });
+      console.error('Error fetching blog post:', error);
+      return res.status(500).json({ error: 'Failed to retrieve blog post' });
     }
   } else {
     // Handle other HTTP methods

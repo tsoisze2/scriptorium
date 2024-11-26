@@ -1,3 +1,4 @@
+// pages\adminOptions\reports\blogPostReports.tsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
@@ -9,9 +10,6 @@ interface ReportBlogPost {
   blogPost: {
     id: number;
     title: string;
-  };
-  author: {
-    username: string;
   };
 }
 
@@ -73,7 +71,7 @@ const BlogPostReports: React.FC = () => {
         return;
       }
 
-      const response = await axios.put(
+      await axios.put(
         "/api/report/blogPost/resolve",
         { reportBlogPostId: reportId },
         {
@@ -82,14 +80,39 @@ const BlogPostReports: React.FC = () => {
           },
         }
       );
+
       setMessage("Report resolved successfully.");
-
-      // Fetch updated reports after resolving
-      fetchReports(currentPage);
-
+      fetchReports(currentPage); // Refresh the list
     } catch (error: any) {
       console.error("Error resolving report:", error);
       setError("Failed to resolve the report. Please try again.");
+    }
+  };
+
+  // Hide a blog post
+  const handleHideBlogPost = async (blogPostId: number) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        router.push("/users/login");
+        return;
+      }
+
+      await axios.put(
+        "/api/blogpost/hide",
+        { blogPostId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setMessage("BlogPost hidden successfully.");
+      fetchReports(currentPage); // Refresh the list
+    } catch (error: any) {
+      console.error("Error hiding blog post:", error);
+      setError("Failed to hide the blog post. Please try again.");
     }
   };
 
@@ -141,16 +164,27 @@ const BlogPostReports: React.FC = () => {
                   <strong>Blog Post:</strong> {report.blogPost.title} (ID:{" "}
                   {report.blogPost.id})
                 </p>
-                <p>
-                  <strong>Reported By:</strong> {report.author.username}
-                </p>
               </div>
-              <button
-                onClick={() => handleResolve(report.id)}
-                className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
-              >
-                Resolve
-              </button>
+              <div className="space-x-4">
+                <button
+                  onClick={() => router.push(`/adminOptions/reports/blogPost/${report.blogPost.id}`)}
+                  className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+                >
+                  View BlogPost
+                </button>
+                <button
+                  onClick={() => handleHideBlogPost(report.blogPost.id)}
+                  className="bg-yellow-600 text-white py-2 px-4 rounded hover:bg-yellow-700"
+                >
+                  Hide BlogPost
+                </button>
+                <button
+                  onClick={() => handleResolve(report.id)}
+                  className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+                >
+                  Resolve
+                </button>
+              </div>
             </li>
           ))}
         </ul>
@@ -178,15 +212,6 @@ const BlogPostReports: React.FC = () => {
           </button>
         </div>
       )}
-
-      <div className="mt-6 space-y-4">
-        <button
-          onClick={() => router.push("/adminOptions")}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-        >
-          Go To Admin Options
-        </button>
-      </div>
     </div>
   );
 };
