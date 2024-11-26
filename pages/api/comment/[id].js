@@ -1,36 +1,39 @@
-// pages/api/comment/[id].js
-
 import prisma from "@/utils/db";
 
 export default async function handler(req, res) {
   const { id } = req.query;
 
-  // Ensure the ID is a valid number
+  // Validate the blogPost ID
   if (!id || isNaN(Number(id))) {
-    return res.status(400).json({ error: 'Invalid ID provided' });
+    return res.status(400).json({ error: "Invalid blogPost ID" });
   }
 
-  if (req.method === 'GET') {
+  if (req.method === "GET") {
     try {
-      // Fetch the comment by its ID
-      const comment = await prisma.comment.findUnique({
+      // Fetch all comments for the blogPost
+      const comments = await prisma.comment.findMany({
         where: {
-          id: Number(id),  // Convert the id from query string to a number
+          blogPostId: Number(id),
+          visibleToPublic: true, // Ensure only visible comments are fetched
+        },
+        include: {
+          author: {
+            select: {
+              username: true, // Fetch author username
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "asc", // Sort comments by creation date
         },
       });
 
-      if (!comment) {
-        return res.status(404).json({ error: 'Comment not found' });
-      }
-
-      // Return the comment data as JSON
-      return res.status(200).json(comment);
+      return res.status(200).json(comments);
     } catch (error) {
-      console.error('Error fetching comment:', error);
-      return res.status(500).json({ error: 'Failed to retrieve comment' });
+      console.error("Error fetching comments:", error);
+      return res.status(500).json({ error: "Failed to fetch comments" });
     }
   } else {
-    // Handle other HTTP methods
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    return res.status(405).json({ error: "Method Not Allowed" });
   }
 }
