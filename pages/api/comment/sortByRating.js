@@ -30,7 +30,8 @@ export default async function handler(req, res) {
             // Fetch comments related to the given blogPostId, including their ratings
             const comments = await prisma.comment.findMany({
                 where: {
-                    blogPostId: Number(blogPostId) // Get comments for a specific blog post
+                    blogPostId: Number(blogPostId), // Get comments for a specific blog post
+                    visibleToPublic: true,
                 },
                 include: {
                     ratings: true, // Include ratings so we can calculate the score
