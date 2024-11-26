@@ -20,18 +20,19 @@ export default async function handler(req, res) {
   }
 
   const tempDir = path.join(process.cwd(), 'temp');
-  await fs.ensureDir(tempDir); // ensure temp exists
+  await fs.ensureDir(tempDir);
 
   const codefp = path.join(tempDir, `main${getExt(language)}`);
   const infp = path.join(tempDir, 'input.txt');
 
   await fs.writeFile(codefp, code);
+
   await fs.writeFile(infp, stdin || '');
 
   try {
     const command = getDockerCommand(language, codefp, infp);
 
-    const { stdout, stderr } = await ep(command, { timeout: 10000, maxBuffer: 1024 * 1024 }); // time+mem limit
+    const { stdout, stderr } = await ep(command, { timeout: 10000, maxBuffer: 1024 * 1024 });
 
     if (stderr) {
       return res.status(200).json({ output: '', error: stderr });
@@ -48,7 +49,7 @@ export default async function handler(req, res) {
     try {
       await fs.remove(tempDir);
     } catch (cleanErr) {
-      console.error('Failed cleanup', cleanErr);
+      console.error('Failed cleanup:', cleanErr);
     }
   }
 }
@@ -95,4 +96,3 @@ function getDockerCommand(lang, codefp, infp) {
 
   return commands[lang];
 }
-
