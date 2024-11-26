@@ -20,13 +20,15 @@ export default async function handler(req, res) {
 
         try {
             // Build dynamic query filters based on which parameters are provided
-            const searchConditions = {};
+            const searchConditions = {
+                visibleToPublic: true, // Ensure only public blog posts are returned
+            };
 
             // Title condition (case-insensitive)
             if (title) {
                 searchConditions.title = {
                     contains: title,
-                }
+                };
             }
 
             // Content condition (search in both description and content)
@@ -42,7 +44,7 @@ export default async function handler(req, res) {
                             contains: content,
                         },
                     },
-                ]
+                ];
             }
 
             // Tags condition (search for posts with matching tags)
@@ -100,8 +102,8 @@ export default async function handler(req, res) {
             // Send the paginated response
             res.status(200).json({
                 blogPosts: paginatedBlogPosts,
-                totalBlogPosts: blogPosts.length, // Total number of posts before pagination
-                totalPages: Math.ceil(blogPosts.length / pageSize), // Total number of pages
+                totalBlogPosts: totalBlogPosts, // Total number of posts before pagination
+                totalPages: Math.ceil(totalBlogPosts / pageSize), // Total number of pages
                 currentPage,
             });
         } catch (error) {
