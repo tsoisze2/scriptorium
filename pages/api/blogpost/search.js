@@ -82,6 +82,7 @@ export default async function handler(req, res) {
                     tags: true, // Include associated tags
                     codeTemplate: true, // Include associated code template
                     ratings: true, // Include associated ratings to calculate the score
+                    author: true,
                 },
             });
 

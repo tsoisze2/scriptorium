@@ -31,6 +31,7 @@ const Profile: React.FC = () => {
   const handleNavigate = (path: string) => {
     router.push(path);
   };
+  
 
   useEffect(() => {
     const fetchProfile = async () => {

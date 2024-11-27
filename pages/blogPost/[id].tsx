@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
+import { User } from "@prisma/client";
+
+interface UserProfile {
+  username: string;
+  id: number;
+}
 
 interface BlogPost {
   id: number;
@@ -9,6 +15,7 @@ interface BlogPost {
   content: string;
   createdAt: string;
   lastModified: string;
+  author: User;
 }
 
 interface Comment {
@@ -16,12 +23,14 @@ interface Comment {
   content: string;
   createdAt: string;
   score: number; // Rating score (upvotes - downvotes)
-  author: { username: string } | null; // Handle null author to avoid runtime errors
+  authorId: number; // Handle null author to avoid runtime errors
+  author: User;
 }
 
 const BlogPostDetails: React.FC = () => {
   const router = useRouter();
   const { id } = router.query; // Retrieve the blog post ID from the URL
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [blogPost, setBlogPost] = useState<BlogPost | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState<string>("");
@@ -30,9 +39,27 @@ const BlogPostDetails: React.FC = () => {
   const [commentError, setCommentError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [commentMessage, setCommentMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
+
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (token) {
+
+          const response = await axios.get<UserProfile>("/api/user/getProfile", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          setProfile(response.data);
+        }
+      } catch (error: any) {
+      }
+    };
 
     const fetchBlogPost = async () => {
       setLoading(true);
@@ -65,6 +92,7 @@ const BlogPostDetails: React.FC = () => {
       }
     };
 
+    fetchProfile();
     fetchBlogPost();
     fetchComments();
   }, [id]);
@@ -108,10 +136,33 @@ const BlogPostDetails: React.FC = () => {
     }
   };
 
+  const handleDeleteComment = async (commentId: number) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        setCommentMessage("You must be logged in to delete a comment.");
+        return;
+      }
+
+      await axios.delete(`/api/comment/delete`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        data: { commentId },
+      });
+
+      // Remove the deleted comment from the list
+      setComments((prev) => prev.filter((comment) => comment.id !== commentId));
+      setCommentMessage("Comment deleted successfully.");
+    } catch (error: any) {
+      console.error("Error deleting comment:", error);
+      setCommentMessage("Failed to delete the comment. Please try again.");
+    }
+  };
+
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > totalPages) return;
 
-    // Fetch comments for the new page
     const fetchComments = async () => {
       try {
         const response = await axios.post(`/api/comment/sortByRating`, {
@@ -126,6 +177,10 @@ const BlogPostDetails: React.FC = () => {
     };
 
     fetchComments();
+  };
+
+  const navigateToCommentDetails = (commentId: number) => {
+    router.push(`/comment/${commentId}`);
   };
 
   if (loading) {
@@ -161,6 +216,10 @@ const BlogPostDetails: React.FC = () => {
         {blogPost.content}
       </p>
       <p className="text-gray-500">
+        <strong>Author:</strong>{" "}
+        {blogPost.author?.username || "Unknown"}
+      </p>
+      <p className="text-gray-500">
         <strong>Created At:</strong>{" "}
         {new Date(blogPost.createdAt).toLocaleDateString()}
       </p>
@@ -189,6 +248,8 @@ const BlogPostDetails: React.FC = () => {
           </button>
         </form>
 
+        {commentMessage && <div className="text-green-500 mb-4">{commentMessage}</div>}
+
         {comments.length === 0 ? (
           <p>No comments yet. Be the first to comment!</p>
         ) : (
@@ -197,12 +258,32 @@ const BlogPostDetails: React.FC = () => {
               <li key={comment.id} className="border p-4 rounded">
                 <p>{comment.content}</p>
                 <p className="text-gray-500 text-sm">
-                  <strong>By:</strong> {comment.author?.username || "Unknown"} on{" "}
+                  <strong>By:</strong> {comment.author.username || "Unknown"} on{" "}
                   {new Date(comment.createdAt).toLocaleDateString()}
                 </p>
                 <p className="text-gray-500 text-sm">
                   <strong>Score:</strong> {comment.score}
                 </p>
+                <div className="space-x-4">
+                  {/* Conditional Admin Options */}
+                  {profile && profile.id === comment.authorId && (
+
+                    <button
+                      onClick={() => handleDeleteComment(comment.id)}
+                      className="bg-red-600 text-white py-1 px-2 rounded hover:bg-red-700 mt-2"
+                    >
+                      Delete Comment
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => navigateToCommentDetails(comment.id)}
+                    className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600"
+                  >
+                    View Details
+                  </button>
+
+                </div>
               </li>
             ))}
           </ul>
@@ -245,5 +326,3 @@ const BlogPostDetails: React.FC = () => {
 };
 
 export default BlogPostDetails;
-
-

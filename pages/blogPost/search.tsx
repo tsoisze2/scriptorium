@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
+import { User } from "@prisma/client";
 
 interface BlogPost {
   id: number;
@@ -9,6 +10,7 @@ interface BlogPost {
   content: string;
   score: number;
   tags: { id: number; name: string }[];
+  author: User;
 }
 
 interface PaginatedResponse {
@@ -159,6 +161,10 @@ const BlogPostSearch: React.FC = () => {
                   <div>
                     <h3 className="font-bold text-lg">{post.title}</h3>
                     <p>{post.description}</p>
+                    <p>
+                      <strong>Author:</strong>{" "}
+                      {post.author.username || "Unknown"}
+                    </p>
                     <p>
                       <strong>Tags:</strong>{" "}
                       {post.tags.map((tag) => tag.name).join(", ") || "None"}

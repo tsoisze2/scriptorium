@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
+import { User } from "@prisma/client";
 
 interface ReportBlogPost {
   id: number;
@@ -10,6 +11,7 @@ interface ReportBlogPost {
   blogPost: {
     id: number;
     title: string;
+    authorId: number;
   };
 }
 
@@ -212,6 +214,14 @@ const BlogPostReports: React.FC = () => {
           </button>
         </div>
       )}
+      <div className="mt-6 space-y-4">
+        <button
+          onClick={() => router.push("/adminOptions")}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+        >
+          Go To Admin Options
+        </button>
+      </div>
     </div>
   );
 };

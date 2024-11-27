@@ -13,16 +13,6 @@ export default async function handler(req, res) {
       // Fetch user details from the database
       const profile = await prisma.user.findUnique({
         where: { username: user.username },
-        select: {
-          username: true,
-          firstName: true,
-          lastName: true,
-          email: true,
-          phoneNum: true,
-          avatarUrl: true,
-          role: true,
-          createdAt: true,
-        },
       });
 
       if (!profile) {

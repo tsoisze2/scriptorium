@@ -50,6 +50,12 @@ export default async function handler(req, res) {
             connect: { id: Number(blogPostId) }, // Link to the blog post by its ID
           },
         },
+        include: {
+          author: true,
+          ratings: true, // Include ratings so we can calculate the score
+          replies: true  // Include replies 
+        }
+
       });
 
       // Return the newly created comment

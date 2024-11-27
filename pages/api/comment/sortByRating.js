@@ -34,6 +34,7 @@ export default async function handler(req, res) {
                     visibleToPublic: true,
                 },
                 include: {
+                    author: true,
                     ratings: true, // Include ratings so we can calculate the score
                     replies: true  // Include replies 
                 }
