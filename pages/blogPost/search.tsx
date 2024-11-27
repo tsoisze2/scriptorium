@@ -71,6 +71,12 @@ const BlogPostSearch: React.FC = () => {
     router.push(`/blogPost/${id}`);
   };
 
+  // Navigate to create blog post page
+  const handleCreateBlogPost = () => {
+    router.push("/blogPost/createblog");
+  };
+  
+
   useEffect(() => {
     fetchBlogPosts();
   }, []);
@@ -141,6 +147,16 @@ const BlogPostSearch: React.FC = () => {
         </button>
       </form>
 
+      {/* Create Blog Post Button */}
+      <div className="mb-6">
+        <button
+          onClick={handleCreateBlogPost}
+          className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+        >
+          Create Blog Post
+        </button>
+      </div>
+
       {/* Error Message */}
       {error && <div className="text-red-500 mb-4">{error}</div>}
 
@@ -175,7 +191,7 @@ const BlogPostSearch: React.FC = () => {
                   </div>
                   <button
                     onClick={() => handleViewPost(post.id)}
-                    className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
                   >
                     View Post
                   </button>
@@ -213,3 +229,4 @@ const BlogPostSearch: React.FC = () => {
 };
 
 export default BlogPostSearch;
+
