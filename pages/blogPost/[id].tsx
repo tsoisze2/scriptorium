@@ -92,6 +92,7 @@ const BlogPostDetails: React.FC = () => {
       }
     };
 
+
     fetchProfile();
     fetchBlogPost();
     fetchComments();
@@ -179,21 +180,35 @@ const BlogPostDetails: React.FC = () => {
     fetchComments();
   };
 
+    // Delete a blog post
+    const handleDelete = async (postId: number) => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          setError("You are not logged in!");
+          return;
+        }
+
+        await axios.delete("/api/blogpost/delete", {
+          headers: { Authorization: `Bearer ${token}` },
+          data: { blogPostId: postId },
+        });
+
+        router.push('/blogPost/search');
+      } catch (error: any) {
+        console.error("Error deleting blog post:", error);
+        setError(
+          error.response?.data?.error || "Failed to delete blog post. Please try again."
+        );
+      }
+    };
+
   const navigateToCommentDetails = (commentId: number) => {
     router.push(`/comment/${commentId}`);
   };
 
   if (loading) {
     return <p>Loading...</p>;
-  }
-
-  if (error) {
-    return (
-      <div className="max-w-2xl mx-auto mt-10 p-6 bg-red-100 text-red-700 rounded-lg">
-        <h2 className="text-2xl font-bold mb-4">Error</h2>
-        <p>{error}</p>
-      </div>
-    );
   }
 
   if (!blogPost) {
@@ -227,6 +242,16 @@ const BlogPostDetails: React.FC = () => {
         <strong>Last Modified:</strong>{" "}
         {new Date(blogPost.lastModified).toLocaleDateString()}
       </p>
+      {error && <p className="text-red-500 text-sm">{error}</p>}
+
+      {profile?.username === blogPost.author.username && (
+        <button
+          onClick={() => handleDelete(blogPost.id)}
+          className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700"
+        >
+          Delete
+        </button>
+      )}
 
       {/* Comment Section */}
       <div className="mt-8">
