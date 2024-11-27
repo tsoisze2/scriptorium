@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
-import { User } from "@prisma/client";
 
 interface BlogPost {
   id: number;
@@ -10,7 +9,13 @@ interface BlogPost {
   content: string;
   score: number;
   tags: { id: number; name: string }[];
-  author: User;
+  author: { id: number; username: string };
+}
+
+interface UserProfile {
+  id: number;
+  username: string;
+  role: string;
 }
 
 interface PaginatedResponse {
@@ -31,6 +36,29 @@ const BlogPostSearch: React.FC = () => {
   const [totalPages, setTotalPages] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
+  // Fetch the logged-in user's profile
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
+      const response = await axios.get<UserProfile>("/api/user/getProfile", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setUserProfile(response.data);
+    } catch (error: any) {
+      console.error("Error fetching user profile:", error);
+      setError("Failed to fetch user profile. Please log in again.");
+    }
+  };
 
   // Fetch blog posts from the API
   const fetchBlogPosts = async (page: number = 1) => {
@@ -71,19 +99,49 @@ const BlogPostSearch: React.FC = () => {
     router.push(`/blogPost/${id}`);
   };
 
+  // Delete a blog post
+  const handleDelete = async (postId: number) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        setError("You are not logged in!");
+        return;
+      }
+
+      await axios.delete("/api/blogpost/delete", {
+        headers: { Authorization: `Bearer ${token}` },
+        data: { blogPostId: postId },
+      });
+
+      fetchBlogPosts(currentPage); // Refresh the posts after deletion
+    } catch (error: any) {
+      console.error("Error deleting blog post:", error);
+      setError(
+        error.response?.data?.error || "Failed to delete blog post. Please try again."
+      );
+    }
+  };
+
   // Navigate to create blog post page
-  const handleCreateBlogPost = () => {
+  const handleCreatePost = () => {
     router.push("/blogPost/createblog");
   };
-  
 
   useEffect(() => {
+    fetchUserProfile();
     fetchBlogPosts();
   }, []);
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Search Blog Posts</h2>
+
+      {userProfile && (
+        <div className="mb-4">
+          <p>Welcome, {userProfile.username}!</p>
+          {userProfile.role === "ADMIN" && <p>You have admin privileges.</p>}
+        </div>
+      )}
 
       {/* Search Form */}
       <form onSubmit={handleSearch} className="mb-6 space-y-4">
@@ -126,19 +184,6 @@ const BlogPostSearch: React.FC = () => {
             placeholder="e.g., beginner, JavaScript"
           />
         </div>
-        <div>
-          <label htmlFor="codeTemplateId" className="block font-bold mb-1">
-            Code Template ID
-          </label>
-          <input
-            type="text"
-            id="codeTemplateId"
-            value={codeTemplateId}
-            onChange={(e) => setCodeTemplateId(e.target.value)}
-            className="w-full p-2 border rounded"
-            placeholder="Search by code template ID"
-          />
-        </div>
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
@@ -146,16 +191,6 @@ const BlogPostSearch: React.FC = () => {
           Search
         </button>
       </form>
-
-      {/* Create Blog Post Button */}
-      <div className="mb-6">
-        <button
-          onClick={handleCreateBlogPost}
-          className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
-        >
-          Create Blog Post
-        </button>
-      </div>
 
       {/* Error Message */}
       {error && <div className="text-red-500 mb-4">{error}</div>}
@@ -189,12 +224,22 @@ const BlogPostSearch: React.FC = () => {
                       <strong>Score:</strong> {post.score}
                     </p>
                   </div>
-                  <button
-                    onClick={() => handleViewPost(post.id)}
-                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-                  >
-                    View Post
-                  </button>
+                  <div>
+                    <button
+                      onClick={() => handleViewPost(post.id)}
+                      className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 mr-2"
+                    >
+                      View Post
+                    </button>
+                    {userProfile?.username === post.author.username && (
+                      <button
+                        onClick={() => handleDelete(post.id)}
+                        className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -224,9 +269,20 @@ const BlogPostSearch: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* Create Blog Post Button */}
+      <div className="mt-6">
+        <button
+          onClick={handleCreatePost}
+          className="w-full bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700"
+        >
+          Create New Blog Post
+        </button>
+      </div>
     </div>
   );
 };
 
 export default BlogPostSearch;
+
 
