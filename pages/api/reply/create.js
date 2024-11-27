@@ -65,6 +65,9 @@ export default async function handler(req, res) {
             replyingTo: { connect: { id: Number(replyingToId) } }, // Conditionally add replyingTo
           }),
         },
+        include: {
+          author: true,
+        }
       });
 
       // Return the newly created reply

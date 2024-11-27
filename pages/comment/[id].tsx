@@ -39,6 +39,7 @@ const CommentDetailsPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [newReply, setNewReply] = useState<string>(""); // New state for reply input
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
@@ -55,8 +56,7 @@ const CommentDetailsPage: React.FC = () => {
           });
           setProfile(response.data);
         }
-      } catch (error: any) {
-      }
+      } catch (error: any) {}
     };
 
     const fetchCommentDetails = async () => {
@@ -91,6 +91,47 @@ const CommentDetailsPage: React.FC = () => {
     fetchCommentDetails();
     fetchReplies(currentPage);
   }, [id, currentPage]);
+
+  const handleReplySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setMessage(null);
+
+    if (!newReply.trim()) {
+      setError("Reply content cannot be empty.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        setError("You must be logged in to reply.");
+        return;
+      }
+
+      const response = await axios.post(
+        "/api/reply/create",
+        {
+          content: newReply,
+          commentId: id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setReplies((prevReplies) => [response.data, ...prevReplies]); // Add new reply to the list
+      setNewReply(""); // Clear input field
+      setMessage("Reply posted successfully.");
+    } catch (error: any) {
+      console.error("Error creating reply:", error);
+      setError(
+        error.response?.data?.error || "Failed to post reply. Please try again."
+      );
+    }
+  };
 
   const handleDeleteReply = async (replyId: number) => {
     try {
@@ -128,14 +169,7 @@ const CommentDetailsPage: React.FC = () => {
     return <p>Loading...</p>;
   }
 
-  if (error) {
-    return (
-      <div className="max-w-2xl mx-auto mt-10 p-6 bg-red-100 text-red-700 rounded-lg">
-        <h2 className="text-2xl font-bold mb-4">Error</h2>
-        <p>{error}</p>
-      </div>
-    );
-  }
+  
 
   if (!commentDetails) {
     return (
@@ -156,6 +190,26 @@ const CommentDetailsPage: React.FC = () => {
           <strong>By:</strong> {commentDetails.author?.username || "Unknown"} on{" "}
           {new Date(commentDetails.createdAt).toLocaleDateString()}
         </p>
+      </div>
+
+      {/* Reply Box */}
+      <div className="mt-8 mb-6">
+        <h2 className="text-xl font-bold mb-4">Post a Reply</h2>
+        <form onSubmit={handleReplySubmit}>
+          <textarea
+            value={newReply}
+            onChange={(e) => setNewReply(e.target.value)}
+            className="w-full p-2 border rounded"
+            placeholder="Write a reply..."
+          ></textarea>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <button
+            type="submit"
+            className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 mt-2"
+          >
+            Submit Reply
+          </button>
+        </form>
       </div>
 
       {/* Replies Section */}
@@ -220,7 +274,7 @@ const CommentDetailsPage: React.FC = () => {
           onClick={() => router.back()}
           className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
         >
-          Back
+          Back 
         </button>
       </div>
     </div>

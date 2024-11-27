@@ -161,13 +161,20 @@ const Signup: React.FC = () => {
         </div>
 
         {/* Submit Button */}
-        <div>
+        <div className="space-y-4">
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
           >
             Sign Up
           </button>
+
+          <button
+          onClick={() => router.back()} // Adjust this path as needed
+          className={`w-full py-2 px-4 text-white font-bold rounded bg-blue-600 hover:bg-blue-700`}
+        >
+          Back
+        </button>
         </div>
       </form>
     </div>

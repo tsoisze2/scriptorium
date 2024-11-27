@@ -29,7 +29,7 @@ const Login: React.FC = () => {
       localStorage.setItem("refreshToken", refreshToken);
 
       // Redirect to the Edit Profile page
-      router.push("/users/profile");
+      router.back()
     } catch (error: any) {
       setError(error.response?.data?.error || "Login failed. Please try again.");
     } finally {
@@ -86,17 +86,21 @@ const Login: React.FC = () => {
         </button>
       </form>
 
-      <div className="mt-6">
-        <a
-          href="/users/signup"
-          target="_self"
-          rel="noopener noreferrer"
-          className="block"
+      <div className="mt-6 space-y-4">
+        <button
+          onClick={() => router.push("/users/signup")} // Adjust this path as needed
+          className={`w-full py-2 px-4 text-white font-bold rounded ${loading ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"
+          }`}
         >
-          <button className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
-            Do not have an account yet? Sign up now
-          </button>
-        </a>
+          Do not have an account yet? Sign up now!
+        </button>
+        <button
+          onClick={() => router.back()} // Adjust this path as needed
+          className={`w-full py-2 px-4 text-white font-bold rounded ${loading ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"
+          }`}
+        >
+          Back
+        </button>
       </div>
 
     </div>
