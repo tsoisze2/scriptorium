@@ -1,6 +1,8 @@
 import { useRouter } from "next/router";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 interface Tag {
   id: number;
@@ -26,6 +28,8 @@ const TemplateDetails: React.FC = () => {
   const [template, setTemplate] = useState<CodeTemplate | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [executionResult, setExecutionResult] = useState<{ stdout: string | null; stderr: string | null } | null>(null);
+  const [executing, setExecuting] = useState<boolean>(false);
 
   useEffect(() => {
     if (!id) return; // Wait for the id to be available from the router
@@ -48,6 +52,31 @@ const TemplateDetails: React.FC = () => {
 
     fetchTemplateDetails();
   }, [id]);
+
+  const handleExecuteCode = async () => {
+    if (!template) return;
+
+    try {
+      setExecuting(true);
+      setExecutionResult(null);
+      const response = await axios.post(`/api/codeTemplate/executecode`, {
+        code: template.code,
+        language: template.language,
+      });
+      setExecutionResult({
+        stdout: response.data.stdout,
+        stderr: response.data.stderr,
+      });
+    } catch (err: any) {
+      console.error("Error executing code:", err);
+      setExecutionResult({
+        stdout: null,
+        stderr: err.response?.data?.error || "Failed to execute the code."
+      });
+    } finally {
+      setExecuting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -92,7 +121,6 @@ const TemplateDetails: React.FC = () => {
           <strong>Last Modified:</strong>{" "}
           {new Date(template.lastModified).toLocaleDateString()}
         </p>
-
       </div>
 
       <div className="mb-6">
@@ -102,10 +130,46 @@ const TemplateDetails: React.FC = () => {
 
       <div className="mb-6">
         <h2 className="text-2xl font-bold mb-4">Code</h2>
-        <pre className="bg-gray-100 p-4 rounded overflow-auto">
-          <code>{template.code}</code>
-        </pre>
+        <SyntaxHighlighter
+          language={template.language.toLowerCase()}
+          style={vscDarkPlus}
+          className="rounded"
+        >
+          {template.code}
+        </SyntaxHighlighter>
       </div>
+
+      <div className="mb-6">
+        <button
+          className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 mr-4"
+          onClick={handleExecuteCode}
+          disabled={executing}
+        >
+          {executing ? "Executing..." : "Run Code"}
+        </button>
+      </div>
+
+      {executionResult && (
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold mb-4">Execution Result</h2>
+          {executionResult.stdout && (
+            <div className="mb-4">
+              <h3 className="text-xl font-bold mb-2">Standard Output</h3>
+              <pre className="bg-gray-100 p-4 rounded overflow-auto">
+                <code>{executionResult.stdout}</code>
+              </pre>
+            </div>
+          )}
+          {executionResult.stderr && (
+            <div className="mb-4">
+              <h3 className="text-xl font-bold mb-2">Standard Error</h3>
+              <pre className="bg-red-100 p-4 rounded overflow-auto">
+                <code>{executionResult.stderr}</code>
+              </pre>
+            </div>
+          )}
+        </div>
+      )}
 
       <button
         className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
