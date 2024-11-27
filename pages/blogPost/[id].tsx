@@ -1,12 +1,15 @@
+// blogPost\[id].tsx
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import { User } from "@prisma/client";
 
+
 interface UserProfile {
   username: string;
   id: number;
 }
+
 
 interface BlogPost {
   id: number;
@@ -18,6 +21,7 @@ interface BlogPost {
   author: User;
 }
 
+
 interface Comment {
   id: number;
   content: string;
@@ -26,6 +30,7 @@ interface Comment {
   authorId: number; // Handle null author to avoid runtime errors
   author: User;
 }
+
 
 const BlogPostDetails: React.FC = () => {
   const router = useRouter();
@@ -41,13 +46,16 @@ const BlogPostDetails: React.FC = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [commentMessage, setCommentMessage] = useState<string | null>(null);
 
+
   useEffect(() => {
     if (!id) return;
+
 
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem("accessToken");
         if (token) {
+
 
           const response = await axios.get<UserProfile>("/api/user/getProfile", {
             headers: {
@@ -55,15 +63,18 @@ const BlogPostDetails: React.FC = () => {
             },
           });
 
+
           setProfile(response.data);
         }
       } catch (error: any) {
       }
     };
 
+
     const fetchBlogPost = async () => {
       setLoading(true);
       setError(null);
+
 
       try {
         const response = await axios.get<BlogPost>(`/api/blogpost/${id}`);
@@ -77,6 +88,7 @@ const BlogPostDetails: React.FC = () => {
         setLoading(false);
       }
     };
+
 
     const fetchComments = async (page: number = 1) => {
       try {
@@ -93,19 +105,24 @@ const BlogPostDetails: React.FC = () => {
     };
 
 
+
+
     fetchProfile();
     fetchBlogPost();
     fetchComments();
   }, [id]);
 
+
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setCommentError(null);
+
 
     if (!newComment.trim()) {
       setCommentError("Comment cannot be empty.");
       return;
     }
+
 
     try {
       const token = localStorage.getItem("accessToken");
@@ -113,6 +130,7 @@ const BlogPostDetails: React.FC = () => {
         setCommentError("You must be logged in to comment.");
         return;
       }
+
 
       const response = await axios.post(
         "/api/comment/create",
@@ -127,6 +145,7 @@ const BlogPostDetails: React.FC = () => {
         }
       );
 
+
       setComments((prev) => [response.data, ...prev]); // Add the new comment to the list
       setNewComment(""); // Clear the input field
     } catch (error: any) {
@@ -137,6 +156,7 @@ const BlogPostDetails: React.FC = () => {
     }
   };
 
+
   const handleDeleteComment = async (commentId: number) => {
     try {
       const token = localStorage.getItem("accessToken");
@@ -145,12 +165,14 @@ const BlogPostDetails: React.FC = () => {
         return;
       }
 
+
       await axios.delete(`/api/comment/delete`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
         data: { commentId },
       });
+
 
       // Remove the deleted comment from the list
       setComments((prev) => prev.filter((comment) => comment.id !== commentId));
@@ -161,8 +183,10 @@ const BlogPostDetails: React.FC = () => {
     }
   };
 
+
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > totalPages) return;
+
 
     const fetchComments = async () => {
       try {
@@ -177,8 +201,10 @@ const BlogPostDetails: React.FC = () => {
       }
     };
 
+
     fetchComments();
   };
+
 
     // Delete a blog post
     const handleDelete = async (postId: number) => {
@@ -189,10 +215,12 @@ const BlogPostDetails: React.FC = () => {
           return;
         }
 
+
         await axios.delete("/api/blogpost/delete", {
           headers: { Authorization: `Bearer ${token}` },
           data: { blogPostId: postId },
         });
+
 
         router.push('/blogPost/search');
       } catch (error: any) {
@@ -203,13 +231,16 @@ const BlogPostDetails: React.FC = () => {
       }
     };
 
+
   const navigateToCommentDetails = (commentId: number) => {
     router.push(`/comment/${commentId}`);
   };
 
+
   if (loading) {
     return <p>Loading...</p>;
   }
+
 
   if (!blogPost) {
     return (
@@ -218,6 +249,7 @@ const BlogPostDetails: React.FC = () => {
       </div>
     );
   }
+
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
@@ -244,6 +276,7 @@ const BlogPostDetails: React.FC = () => {
       </p>
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
+
       {profile?.username === blogPost.author.username && (
         <button
           onClick={() => handleDelete(blogPost.id)}
@@ -253,9 +286,11 @@ const BlogPostDetails: React.FC = () => {
         </button>
       )}
 
+
       {/* Comment Section */}
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-4">Comments</h2>
+
 
         <form onSubmit={handleCommentSubmit} className="mb-6">
           <textarea
@@ -273,7 +308,9 @@ const BlogPostDetails: React.FC = () => {
           </button>
         </form>
 
+
         {commentMessage && <div className="text-green-500 mb-4">{commentMessage}</div>}
+
 
         {comments.length === 0 ? (
           <p>No comments yet. Be the first to comment!</p>
@@ -293,6 +330,7 @@ const BlogPostDetails: React.FC = () => {
                   {/* Conditional Admin Options */}
                   {profile && profile.id === comment.authorId && (
 
+
                     <button
                       onClick={() => handleDeleteComment(comment.id)}
                       className="bg-red-600 text-white py-1 px-2 rounded hover:bg-red-700 mt-2"
@@ -301,6 +339,7 @@ const BlogPostDetails: React.FC = () => {
                     </button>
                   )}
 
+
                   <button
                     onClick={() => navigateToCommentDetails(comment.id)}
                     className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600"
@@ -308,11 +347,13 @@ const BlogPostDetails: React.FC = () => {
                     View Details
                   </button>
 
+
                 </div>
               </li>
             ))}
           </ul>
         )}
+
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
@@ -338,6 +379,7 @@ const BlogPostDetails: React.FC = () => {
         )}
       </div>
 
+
       <div className="mt-6">
         <button
           onClick={() => router.push("/blogPost/search")} // Adjust this path as needed
@@ -349,5 +391,6 @@ const BlogPostDetails: React.FC = () => {
     </div>
   );
 };
+
 
 export default BlogPostDetails;

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 
+
 const CreateBlogPost: React.FC = () => {
   const router = useRouter();
   const [title, setTitle] = useState<string>("");
@@ -12,17 +13,20 @@ const CreateBlogPost: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setMessage(null);
     setLoading(true);
 
+
     if (!title.trim() || !description.trim() || !content.trim()) {
       setError("Please fill out all required fields.");
       setLoading(false);
       return;
     }
+
 
     try {
       const token = localStorage.getItem("accessToken");
@@ -31,6 +35,7 @@ const CreateBlogPost: React.FC = () => {
         setLoading(false);
         return;
       }
+
 
       const response = await axios.post(
         "/api/blogpost/create",
@@ -42,11 +47,13 @@ const CreateBlogPost: React.FC = () => {
         }
       );
 
+
       setMessage("Blog post created successfully!");
       setTitle("");
       setDescription("");
       setContent("");
       setTags("");
+
 
       // Redirect to the blog post search page
       router.push(`/blogPost/${response.data.id}`);
@@ -58,12 +65,15 @@ const CreateBlogPost: React.FC = () => {
     }
   };
 
+
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-3xl font-bold mb-6">Create a Blog Post</h1>
 
+
       {error && <div className="text-red-500 mb-4">{error}</div>}
       {message && <div className="text-green-500 mb-4">{message}</div>}
+
 
       <form onSubmit={handleSubmit}>
         {/* Title */}
@@ -79,6 +89,7 @@ const CreateBlogPost: React.FC = () => {
           />
         </div>
 
+
         {/* Description */}
         <div className="mb-4">
           <label className="block text-gray-700 font-bold mb-2">
@@ -93,6 +104,7 @@ const CreateBlogPost: React.FC = () => {
           ></textarea>
         </div>
 
+
         {/* Content */}
         <div className="mb-4">
           <label className="block text-gray-700 font-bold mb-2">Content:</label>
@@ -106,6 +118,7 @@ const CreateBlogPost: React.FC = () => {
           ></textarea>
         </div>
 
+
         {/* Tags */}
         <div className="mb-4">
           <label className="block text-gray-700 font-bold mb-2">Tags:</label>
@@ -117,6 +130,7 @@ const CreateBlogPost: React.FC = () => {
             placeholder="Enter tags separated by commas (e.g., react, nextjs)"
           />
         </div>
+
 
         {/* Submit Button */}
         <button
@@ -130,6 +144,7 @@ const CreateBlogPost: React.FC = () => {
         </button>
       </form>
 
+
       <div className="mt-6">
         <button
           onClick={() => router.push("/blogPost/search")}
@@ -141,5 +156,6 @@ const CreateBlogPost: React.FC = () => {
     </div>
   );
 };
+
 
 export default CreateBlogPost;

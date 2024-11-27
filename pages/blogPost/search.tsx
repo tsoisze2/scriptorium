@@ -3,6 +3,7 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { User } from "@prisma/client";
 
+
 interface BlogPost {
   id: number;
   title: string;
@@ -13,12 +14,14 @@ interface BlogPost {
   author: User;
 }
 
+
 interface PaginatedResponse {
   blogPosts: BlogPost[];
   totalBlogPosts: number;
   totalPages: number;
   currentPage: number;
 }
+
 
 const BlogPostSearch: React.FC = () => {
   const router = useRouter();
@@ -32,16 +35,19 @@ const BlogPostSearch: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+
   // Fetch blog posts from the API
   const fetchBlogPosts = async (page: number = 1) => {
     setLoading(true);
     setError(null);
+
 
     try {
       const response = await axios.post<PaginatedResponse>(
         "/api/blogpost/search",
         { title, content, tags, codeTemplateId, page }
       );
+
 
       setBlogPosts(response.data.blogPosts);
       setTotalPages(response.data.totalPages);
@@ -53,11 +59,13 @@ const BlogPostSearch: React.FC = () => {
     }
   };
 
+
   // Handle search form submission
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     fetchBlogPosts(1); // Reset to the first page for a new search
   };
+
 
   // Handle page navigation
   const handlePageChange = (newPage: number) => {
@@ -66,18 +74,22 @@ const BlogPostSearch: React.FC = () => {
     }
   };
 
+
   // Navigate to blog post details
   const handleViewPost = (id: number) => {
     router.push(`/blogPost/${id}`);
   };
 
+
   useEffect(() => {
     fetchBlogPosts();
   }, []);
 
+
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Search Blog Posts</h2>
+
 
       {/* Search Form */}
       <form onSubmit={handleSearch} className="mb-6 space-y-4">
@@ -141,8 +153,10 @@ const BlogPostSearch: React.FC = () => {
         </button>
       </form>
 
+
       {/* Error Message */}
       {error && <div className="text-red-500 mb-4">{error}</div>}
+
 
       {/* Blog Posts List */}
       {loading ? (
@@ -184,6 +198,7 @@ const BlogPostSearch: React.FC = () => {
             </ul>
           )}
 
+
           {/* Pagination Controls */}
           {totalPages > 1 && (
             <div className="flex justify-between mt-6">
@@ -211,5 +226,6 @@ const BlogPostSearch: React.FC = () => {
     </div>
   );
 };
+
 
 export default BlogPostSearch;
