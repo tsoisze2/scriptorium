@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     }
 
     // Validate language type 
-    if (language !== "C" && language !== "C++" && language !== "Java" && language !== "Python" && language !== "JavaScript") {
+    if (language !== "c" && language !== "cpp" && language !== "java" && language !== "python" && language !== "javascript") {
       return res.status(400).json({ error: 'Language has to be one of the following: C, C++, Java, Python, JavaScript' })
     }
 

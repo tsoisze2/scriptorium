@@ -189,6 +189,14 @@ const Profile: React.FC = () => {
           My Ratings
         </button>
 
+        {/* Run Code */}
+        <button
+          onClick={() => router.push("/codeTemplates/runCode")}
+          className="w-full bg-yellow-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+        >
+          Run Code
+        </button>
+
         {/* Conditional rendering for options */}
         {showOptions && (
           <div className="mt-6 space-y-4">

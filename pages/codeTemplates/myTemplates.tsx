@@ -1,6 +1,7 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
-import api from "@/utils/api"; // Use your configured Axios instance
+import axios from "axios" // Use your configured Axios instance
 import { useRouter } from "next/router";
+import { User } from "@prisma/client";
 
 interface Tag {
     id: number;
@@ -16,6 +17,7 @@ interface Template {
     createdAt: string;
     lastModified: string;
     tags: Tag[];
+    author: User;
 }
 
 interface ApiResponse {
@@ -51,15 +53,18 @@ const MyTemplates: React.FC = () => {
         setError(null);
 
         try {
+            // Get access token from localStorage
+            const accessToken = localStorage.getItem("accessToken");
+      
             // Use the api instance, which already includes the base URL '/api' and token handling
-            const response = await api.post<ApiResponse>(
-                "/codeTemplate/searchMyTemplates",
+            const response = await axios.post(
+                "/api/codeTemplate/searchMyTemplates", 
+                {...searchParams, page: currentPage}, 
                 {
-                    ...searchParams,
-                    page: currentPage,
+                headers: {
+                  'Authorization': `Bearer ${accessToken}`
                 }
-            );
-
+              });
             setTemplates(response.data.templates);
             setTotalTemplates(response.data.totalTemplates);
             setTotalPages(response.data.totalPages);
@@ -137,6 +142,13 @@ const MyTemplates: React.FC = () => {
                     Search
                 </button>
             </form>
+
+            <button
+                onClick={() => router.push("/codeTemplates/createTemplate")}
+                className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            >
+                Create New
+            </button>
 
             {/* Error Message */}
             {error && (
