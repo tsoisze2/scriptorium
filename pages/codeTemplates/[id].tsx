@@ -64,13 +64,13 @@ const TemplateDetails: React.FC = () => {
         language: template.language,
       });
       setExecutionResult({
-        stdout: response.data.stdout,
-        stderr: response.data.stderr,
+        stdout: response.data.output,
+        stderr: response.data.error,
       });
     } catch (err: any) {
       console.error("Error executing code:", err);
       setExecutionResult({
-        stdout: null,
+        stdout: err.response.data.output,
         stderr: err.response?.data?.error || "Failed to execute the code."
       });
     } finally {

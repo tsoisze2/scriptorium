@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Execution timed out' });
     }
 
-    res.status(500).json({ error: 'Error', details: error.message });
+    res.status(500).json({ output: stdout, error: 'Error', details: error.message });
   } finally {
     try {
       await fs.remove(tempDir);

@@ -34,7 +34,10 @@ const CreateCodeTemplate: React.FC = () => {
       const accessToken = localStorage.getItem("accessToken");
       
       // Make API call to create code template
-      const response = await axios.post("/api/codeTemplate/create", formData, {
+      const response = await axios.post(
+        "/api/codeTemplate/create", 
+        formData, 
+        {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
@@ -138,6 +141,15 @@ const CreateCodeTemplate: React.FC = () => {
           {loading ? "Creating Template..." : "Create Template"}
         </button>
       </form>
+
+      <button
+        onClick={() => router.push("/codeTemplates/myTemplates")}
+        className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+      >
+        Back to Templates
+      </button>
+
+
     </div>
   );
 };
