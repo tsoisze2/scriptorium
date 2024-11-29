@@ -1,7 +1,6 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/router";
 import api from "@/utils/api";
-
 // Define the structure of the form data
 interface FormData {
   firstName?: string;
@@ -11,7 +10,6 @@ interface FormData {
   password?: string;
   avatarUrl?: string;
 }
-
 // Define the structure of the API response
 interface ApiResponse {
   username: string;
@@ -21,7 +19,6 @@ interface ApiResponse {
   phoneNum?: string;
   avatarUrl?: string;
 }
-
 const EditProfile: React.FC = () => {
   const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
@@ -32,29 +29,24 @@ const EditProfile: React.FC = () => {
     password: "",
     avatarUrl: "",
   });
-
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(
     null
   );
   const [loading, setLoading] = useState<boolean>(false);
-
   // Handle input changes
   const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-
   // Handle form submission
   const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     setMessage(null); // Clear previous messages
     setLoading(true);
-
     try {
       const response = await api.put<ApiResponse>("/user/editProfile", {
         ...formData,
       });
-
       setMessage({ type: "success", text: "Profile updated successfully!" });
       setFormData({
         firstName: "",
@@ -73,12 +65,9 @@ const EditProfile: React.FC = () => {
       setLoading(false);
     }
   };
-
-
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Edit Profile</h2>
-
       {message && (
         <div
           className={`mb-4 p-2 rounded ${message.type === "error" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
@@ -87,7 +76,6 @@ const EditProfile: React.FC = () => {
           {message.text}
         </div>
       )}
-
       <form onSubmit={handleSubmit}>
         {/* First Name */}
         <label className="block mb-2">
@@ -101,7 +89,6 @@ const EditProfile: React.FC = () => {
             placeholder="Enter your first name"
           />
         </label>
-
         {/* Last Name */}
         <label className="block mb-2">
           Last Name
@@ -114,7 +101,6 @@ const EditProfile: React.FC = () => {
             placeholder="Enter your last name"
           />
         </label>
-
         {/* Email */}
         <label className="block mb-2">
           Email
@@ -127,7 +113,6 @@ const EditProfile: React.FC = () => {
             placeholder="Enter your email"
           />
         </label>
-
         {/* Phone Number */}
         <label className="block mb-2">
           Phone Number
@@ -140,7 +125,6 @@ const EditProfile: React.FC = () => {
             placeholder="Enter your phone number"
           />
         </label>
-
         {/* Password */}
         <label className="block mb-2">
           Password
@@ -153,7 +137,6 @@ const EditProfile: React.FC = () => {
             placeholder="Enter a new password"
           />
         </label>
-
         {/* Avatar URL */}
         <label className="block mb-4">
           Avatar URL
@@ -166,7 +149,6 @@ const EditProfile: React.FC = () => {
             placeholder="Enter avatar URL"
           />
         </label>
-
         <button
           type="submit"
           className={`w-full py-2 px-4 font-bold text-white rounded ${loading ? "bg-gray-500" : "bg-green-600 hover:bg-green-700"
@@ -176,7 +158,6 @@ const EditProfile: React.FC = () => {
           {loading ? "Updating..." : "Update Profile"}
         </button>
       </form>
-
       <div className="mt-6 space-y-4">
         <button
           onClick={() => router.push("/users/profile")}
@@ -185,9 +166,7 @@ const EditProfile: React.FC = () => {
           Go To My Profile
         </button>
       </div>
-
     </div>
   );
 };
-
 export default EditProfile;
