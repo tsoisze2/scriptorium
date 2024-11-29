@@ -89,6 +89,62 @@ const MyTemplates: React.FC = () => {
         fetchTemplates();
     };
 
+    const handleDelete = async (templateId: number) => {
+        try {
+            const confirmDelete = window.confirm("Are you sure you want to delete this template?");
+            if (!confirmDelete) return;
+    
+            // Call the API to delete the template
+            const accessToken = localStorage.getItem("accessToken");
+    
+            await axios.delete('/api/codeTemplate/delete', {
+                data: { codeTemplateId: templateId },
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+    
+            // Update the state to remove the deleted template
+            setTemplates((prevTemplates) => prevTemplates.filter(template => template.id !== templateId));
+            alert("Template deleted successfully.");
+        } catch (error) {
+            console.error("Failed to delete the template:", error);
+            alert("An error occurred while trying to delete the template. Please try again later.");
+        }
+    };
+    
+
+    const handleFork = async (templateId: number) => {
+        try {
+            // Retrieve the access token
+            const accessToken = localStorage.getItem("accessToken");
+    
+            // Call the API to fork the template
+            const response = await axios.post('/api/codeTemplate/fork', {
+                templateId: templateId
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+    
+            // Optionally, update the state with the new forked template
+            const newTemplate = response.data;
+            if (newTemplate && !newTemplate.tags) {
+                newTemplate.tags = [];
+            }
+            if (setTemplates) {
+                setTemplates((prevTemplates) => prevTemplates ? [newTemplate, ...prevTemplates] : [newTemplate]);
+            } else {
+                console.error('setTemplates is not defined or initialized properly.');
+            }
+            alert("Template forked successfully.");
+        } catch (error) {
+            console.error("Failed to fork the template:", error);
+            alert("An error occurred while trying to fork the template. Please try again later.");
+        }
+    };
+
     const handlePageChange = (page: number) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
@@ -188,6 +244,18 @@ const MyTemplates: React.FC = () => {
                                             </span>
                                         ))}
                                     </div>
+                                    <button
+                                        onClick={() => handleDelete(template.id)}
+                                        className="mt-4 bg-red-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+                                    >
+                                        Delete
+                                    </button>
+                                    <button
+                                        onClick={() => handleFork(template.id)}
+                                        className="mt-4 bg-green-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+                                    >
+                                        Fork
+                                    </button>
                                 </li>
                             ))}
                         </ul>

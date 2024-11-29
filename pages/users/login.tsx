@@ -29,7 +29,7 @@ const Login: React.FC = () => {
       localStorage.setItem("refreshToken", refreshToken);
 
       // Redirect to the Edit Profile page
-      router.back()
+      router.push("/users/profile");
     } catch (error: any) {
       setError(error.response?.data?.error || "Login failed. Please try again.");
     } finally {
