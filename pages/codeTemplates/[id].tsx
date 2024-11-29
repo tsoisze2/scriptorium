@@ -1,8 +1,11 @@
 import { useRouter } from "next/router";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import CodeMirror from "@uiw/react-codemirror";
+import { javascript } from "@codemirror/lang-javascript";
+import { python } from "@codemirror/lang-python";
+import { java } from "@codemirror/lang-java";
+import { cpp } from "@codemirror/lang-cpp";
 
 interface Tag {
   id: number;
@@ -65,7 +68,7 @@ const TemplateDetails: React.FC = () => {
       });
       setExecutionResult({
         stdout: response.data.output,
-        stderr: response.data.error,
+        stderr: response.data.error
       });
     } catch (err: any) {
       console.error("Error executing code:", err);
@@ -105,6 +108,22 @@ const TemplateDetails: React.FC = () => {
     );
   }
 
+  const getLanguageExtension = () => {
+    switch (template.language) {
+      case "javascript":
+        return javascript();
+      case "python":
+        return python();
+      case "java":
+        return java();
+      case "c":
+      case "cpp":
+        return cpp();
+      default:
+        return javascript();
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-3xl font-bold mb-4">{template.title}</h1>
@@ -130,13 +149,11 @@ const TemplateDetails: React.FC = () => {
 
       <div className="mb-6">
         <h2 className="text-2xl font-bold mb-4">Code</h2>
-        <SyntaxHighlighter
-          language={template.language.toLowerCase()}
-          style={vscDarkPlus}
-          className="rounded"
-        >
-          {template.code}
-        </SyntaxHighlighter>
+        <CodeMirror
+          value={template.code}
+          extensions={[getLanguageExtension()]}
+          className="border rounded"
+        />
       </div>
 
       <div className="mb-6">
