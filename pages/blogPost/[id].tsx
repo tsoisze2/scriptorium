@@ -236,6 +236,10 @@ const BlogPostDetails: React.FC = () => {
     router.push(`/blogPost/edit/${postId}`);
   };
 
+  const handlecodetemplate = (postId: number) => {
+    router.push(`/blogPost/codeTemplates/${postId}`);
+  };
+
 
   const navigateToCommentDetails = (commentId: number) => {
     router.push(`/comment/${commentId}`);
@@ -285,7 +289,7 @@ const BlogPostDetails: React.FC = () => {
       {profile?.username === blogPost.author.username && (
         <button
           onClick={() => handleDelete(blogPost.id)}
-          className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700"
+          className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 mr-4"
         >
           Delete
         </button>
@@ -294,9 +298,18 @@ const BlogPostDetails: React.FC = () => {
       {profile?.username === blogPost.author.username && (
         <button
           onClick={() => handleEdit(blogPost.id)}
-          className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+          className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 mr-4"
         >
           Edit
+        </button>
+      )}
+
+      {profile?.username === blogPost.author.username && (
+        <button
+          onClick={() => handlecodetemplate(blogPost.id)}
+          className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+        >
+          CodeTemplate
         </button>
       )}
 
