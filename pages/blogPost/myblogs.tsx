@@ -78,12 +78,22 @@ const MyBlogs: React.FC = () => {
                 <strong>Tags:</strong>{" "}
                 {post.tags.map((tag) => tag.name).join(", ") || "None"}
               </p>
-              <button
-                onClick={() => router.push(`/blogPost/${post.id}`)}
-                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-              >
-                View Post
-              </button>
+              <div className="flex space-x-4 mt-4">
+                {/* View Post Button */}
+                <button
+                  onClick={() => router.push(`/blogPost/${post.id}`)}
+                  className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                >
+                  View Post
+                </button>
+                {/* Edit Post Button */}
+                <button
+                  onClick={() => router.push(`/blogPost/edit/${post.id}`)}
+                  className="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600"
+                >
+                  Edit Post
+                </button>
+              </div>
             </li>
           ))}
         </ul>
@@ -116,5 +126,6 @@ const MyBlogs: React.FC = () => {
 };
 
 export default MyBlogs;
+
 
 

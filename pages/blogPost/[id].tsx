@@ -231,6 +231,11 @@ const BlogPostDetails: React.FC = () => {
       }
     };
 
+  // Handle editing a blog post
+  const handleEdit = (postId: number) => {
+    router.push(`/blogPost/edit/${postId}`);
+  };
+
 
   const navigateToCommentDetails = (commentId: number) => {
     router.push(`/comment/${commentId}`);
@@ -283,6 +288,15 @@ const BlogPostDetails: React.FC = () => {
           className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700"
         >
           Delete
+        </button>
+      )}
+
+      {profile?.username === blogPost.author.username && (
+        <button
+          onClick={() => handleEdit(blogPost.id)}
+          className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+        >
+          Edit
         </button>
       )}
 
