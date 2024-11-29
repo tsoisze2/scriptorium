@@ -4,7 +4,7 @@ import { pageSize } from "@/config";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        const { title, content, tags, codeTemplateId, page = 1 } = req.body; // Extract query parameters
+        const { title, content, tags, codeTemplateId, author, page = 1 } = req.body; // Extract query parameters
 
         // Validate page number
         if (isNaN(Number(page))) {
@@ -67,6 +67,7 @@ export default async function handler(req, res) {
                 searchConditions.codeTemplateId = Number(codeTemplateId); // Exact match on associated code template ID
             }
 
+
             // Get the total count of matching blog posts
             const totalBlogPosts = await prisma.blogPost.count({
                 where: searchConditions,
@@ -82,7 +83,7 @@ export default async function handler(req, res) {
                     tags: true, // Include associated tags
                     codeTemplate: true, // Include associated code template
                     ratings: true, // Include associated ratings to calculate the score
-                    author: true,
+                    author: true, // Include author details
                 },
             });
 

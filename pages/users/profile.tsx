@@ -167,7 +167,7 @@ const Profile: React.FC = () => {
 
         {/* My Blog Posts */}
         <button
-          onClick={() => router.push("/dkwhat")}
+          onClick={() => router.push("/blogPost/myblogs")}
           className="w-full bg-yellow-600 text-white py-2 px-4 rounded hover:bg-yellow-700"
         >
           My Blog Posts
