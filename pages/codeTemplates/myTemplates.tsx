@@ -143,6 +143,13 @@ const MyTemplates: React.FC = () => {
                 </button>
             </form>
 
+            <button
+                onClick={() => router.push("/codeTemplates/createTemplate")}
+                className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            >
+                Create New
+            </button>
+
             {/* Error Message */}
             {error && (
                 <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
