@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
+import NavBar from "@/utils/nav";
 
 interface UserProfile {
   username: string;
@@ -107,6 +108,8 @@ const Profile: React.FC = () => {
   }
 
   return (
+    <>
+    <NavBar />
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">User Profile</h2>
 
@@ -272,6 +275,7 @@ const Profile: React.FC = () => {
 
 
     </div>
+    </>
   );
 };
 
