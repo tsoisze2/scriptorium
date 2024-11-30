@@ -8,14 +8,14 @@ import { python } from "@codemirror/lang-python";
 import { java } from "@codemirror/lang-java";
 import { cpp } from "@codemirror/lang-cpp";
 
-interface UserProfile {
-  username: string;
-  id: number;
-}
-
 interface Tag {
   id: number;
   name: string;
+}
+
+interface UserProfile {
+  username: string;
+  id: number;
 }
 
 interface CodeTemplate {
@@ -62,7 +62,7 @@ const TemplateDetails: React.FC = () => {
       } catch (error: any) {
       }
     };
-
+    
     const fetchTemplateDetails = async () => {
       try {
         setLoading(true);
@@ -80,7 +80,13 @@ const TemplateDetails: React.FC = () => {
     };
 
     fetchTemplateDetails();
+    fetchProfile();
   }, [id]);
+
+  const handleEdit = (templateId: number) => {
+    router.push(`/codeTemplates/edit/${templateId}`);
+  };
+
 
   const handleExecuteCode = async () => {
     if (!template) return;
@@ -154,6 +160,15 @@ const TemplateDetails: React.FC = () => {
     <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-3xl font-bold mb-4">{template.title}</h1>
 
+      {profile?.id === template.authorId && (
+        <button
+          onClick={() => handleEdit(template.id)}
+          className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 mr-4"
+        >
+          Edit
+        </button>
+      )}
+
       <div className="mb-6">
         <p className="text-gray-600">
           <strong>Language:</strong> {template.language}
@@ -216,9 +231,9 @@ const TemplateDetails: React.FC = () => {
 
       <button
         className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-        onClick={() => router.back()}
+        onClick={() => router.push("/codeTemplates/myTemplates")}
       >
-        Back
+        Back to Templates
       </button>
     </div>
   );
