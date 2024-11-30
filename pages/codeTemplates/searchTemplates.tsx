@@ -130,7 +130,7 @@ const searchTemplates: React.FC = () => {
 
     return (
         <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold mb-4">My Code Templates</h2>
+            <h2 className="text-2xl font-bold mb-4">Code Templates</h2>
 
             {/* Search Form */}
             <form onSubmit={handleSearchSubmit} className="mb-6">
