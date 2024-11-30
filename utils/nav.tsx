@@ -99,7 +99,7 @@ const NavBar: React.FC = () => {
           </li>
           <li
             className="cursor-pointer hover:text-gray-300"
-            onClick={() => handleNavigation("/codeTemplates/search")}
+            onClick={() => handleNavigation("/codeTemplates/searchTemplates")}
           >
             Code Templates
           </li>
