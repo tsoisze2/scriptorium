@@ -16,7 +16,7 @@ export async function comparePassword(password, hash) {
 }
 
 export function generateToken(user) {
-    const expiresAt = Math.floor(Date.now() / 1000) + 15 * 60;
+    const expiresAt = Math.floor(Date.now() / 1000) + 60 * 60;
     const payload = {
         username: user.username,
         role: user.role,

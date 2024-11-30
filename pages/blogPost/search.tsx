@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { User } from "@prisma/client";
+import NavBar from "@/utils/nav";
 
 
 interface BlogPost {
@@ -87,6 +88,8 @@ const BlogPostSearch: React.FC = () => {
 
 
   return (
+    <>
+    <NavBar />
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Search Blog Posts</h2>
 
@@ -224,6 +227,7 @@ const BlogPostSearch: React.FC = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
