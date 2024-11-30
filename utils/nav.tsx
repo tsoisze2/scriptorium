@@ -112,6 +112,19 @@ const NavBar: React.FC = () => {
           >
             Run Code Online
           </li>
+
+          { profile && (
+            <li>   ----   </li>
+          )}
+
+          { profile && (
+            <li
+              className="cursor-pointer hover:text-gray-300"
+              onClick={() => handleNavigation("/codeTemplates/createTemplate")}
+            >
+              Create Code Template
+            </li>
+          )}
         </ul>
 
         {/* User Dropdown */}

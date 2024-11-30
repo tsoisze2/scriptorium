@@ -143,10 +143,10 @@ const CreateCodeTemplate: React.FC = () => {
       </form>
 
       <button
-        onClick={() => router.push("/codeTemplates/myTemplates")}
+        onClick={() => router.back()}
         className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
       >
-        Back to Templates
+        Back
       </button>
 
 

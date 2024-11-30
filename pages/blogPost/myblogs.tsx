@@ -121,6 +121,14 @@ const MyBlogs: React.FC = () => {
           </button>
         </div>
       )}
+      <div className="mt-6 space-y-4">
+        <button
+          onClick={() => router.back()}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+        >
+          Back
+        </button>
+      </div>
     </div>
   );
 };

@@ -1,11 +1,17 @@
 import { useRouter } from "next/router";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import NavBar from "@/utils/nav";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
 import { java } from "@codemirror/lang-java";
 import { cpp } from "@codemirror/lang-cpp";
+
+interface UserProfile {
+  username: string;
+  id: number;
+}
 
 interface Tag {
   id: number;
@@ -29,6 +35,7 @@ const TemplateDetails: React.FC = () => {
   const { id } = router.query;
 
   const [template, setTemplate] = useState<CodeTemplate | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [executionResult, setExecutionResult] = useState<{ stdout: string | null; stderr: string | null } | null>(null);
@@ -36,6 +43,25 @@ const TemplateDetails: React.FC = () => {
 
   useEffect(() => {
     if (!id) return; // Wait for the id to be available from the router
+
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (token) {
+
+
+          const response = await axios.get<UserProfile>("/api/user/getProfile", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+
+          setProfile(response.data);
+        }
+      } catch (error: any) {
+      }
+    };
 
     const fetchTemplateDetails = async () => {
       try {
@@ -190,9 +216,9 @@ const TemplateDetails: React.FC = () => {
 
       <button
         className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-        onClick={() => router.push("/codeTemplates/myTemplates")}
+        onClick={() => router.back()}
       >
-        Back to Templates
+        Back
       </button>
     </div>
   );

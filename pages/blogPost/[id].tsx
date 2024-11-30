@@ -410,10 +410,10 @@ const BlogPostDetails: React.FC = () => {
 
       <div className="mt-6">
         <button
-          onClick={() => router.push("/blogPost/search")} // Adjust this path as needed
+          onClick={() => router.back()} // Adjust this path as needed
           className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
         >
-          Back to Blog Posts
+          Back
         </button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import axios from "axios";
+import NavBar from "@/utils/nav";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
@@ -57,6 +58,8 @@ const CodeRunner: React.FC = () => {
   };
 
   return (
+    <>
+    <NavBar />
     <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-3xl font-bold mb-6">Run Your Code</h1>
 
@@ -126,13 +129,14 @@ const CodeRunner: React.FC = () => {
       )}
       <div className="mt-6 space-y-4">
             <button
-                onClick={() => router.push("/users/profile")}
+                onClick={() => router.back()}
                 className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
             >
-                Go To My Profile
+                Back
             </button>
         </div>
     </div>
+    </>
   );
 };
 

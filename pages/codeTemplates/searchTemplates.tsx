@@ -1,5 +1,6 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import axios from "axios" // Use your configured Axios instance
+import NavBar from "@/utils/nav";
 import { useRouter } from "next/router";
 import { User } from "@prisma/client";
 
@@ -7,6 +8,12 @@ interface Tag {
     id: number;
     name: string;
 }
+
+interface UserProfile {
+    username: string;
+    id: number;
+  }
+  
 
 interface Template {
     id: number;
@@ -30,6 +37,7 @@ interface ApiResponse {
 const searchTemplates: React.FC = () => {
     const [templates, setTemplates] = useState<Template[]>([]);
     const [totalTemplates, setTotalTemplates] = useState<number>(0);
+    const [profile, setProfile] = useState<UserProfile | null>(null);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
     const [searchParams, setSearchParams] = useState({
@@ -45,8 +53,28 @@ const searchTemplates: React.FC = () => {
 
     useEffect(() => {
         fetchTemplates();
+        fetchProfile();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage]);
+
+    const fetchProfile = async () => {
+        try {
+          const token = localStorage.getItem("accessToken");
+          if (token) {
+  
+  
+            const response = await axios.get<UserProfile>("/api/user/getProfile", {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+  
+  
+            setProfile(response.data);
+          }
+        } catch (error: any) {
+        }
+    };
 
     const fetchTemplates = async () => {
         setLoading(true);
@@ -129,6 +157,8 @@ const searchTemplates: React.FC = () => {
 
 
     return (
+        <>
+        <NavBar />
         <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
             <h2 className="text-2xl font-bold mb-4">Code Templates</h2>
 
@@ -221,12 +251,14 @@ const searchTemplates: React.FC = () => {
                                             </span>
                                         ))}
                                     </div>
-                                    <button
-                                        onClick={() => handleFork(template.id)}
-                                        className="mt-4 bg-green-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-                                    >
-                                        Fork
-                                    </button>
+                                    { profile?.username && (
+                                        <button
+                                            onClick={() => handleFork(template.id)}
+                                            className="mt-4 bg-green-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+                                        >
+                                            Fork
+                                        </button>
+                                    )}
                                 </li>
                             ))}
                         </ul>
@@ -258,13 +290,14 @@ const searchTemplates: React.FC = () => {
             </div>
             <div className="mt-6 space-y-4">
                 <button
-                    onClick={() => router.push("/users/profile")}
+                    onClick={() => router.back()}
                     className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
                 >
-                    Go To My Profile
+                    Back
                 </button>
             </div>
         </div>
+        </>
     );
 };
 

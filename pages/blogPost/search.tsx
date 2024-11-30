@@ -89,144 +89,153 @@ const BlogPostSearch: React.FC = () => {
 
   return (
     <>
-    <NavBar />
-    <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Search Blog Posts</h2>
+      <NavBar />
+      <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold mb-4">Search Blog Posts</h2>
 
 
-      {/* Search Form */}
-      <form onSubmit={handleSearch} className="mb-6 space-y-4">
-        <div>
-          <label htmlFor="title" className="block font-bold mb-1">
-            Title
-          </label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full p-2 border rounded"
-            placeholder="Search by title"
-          />
-        </div>
-        <div>
-          <label htmlFor="content" className="block font-bold mb-1">
-            Content
-          </label>
-          <input
-            type="text"
-            id="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="w-full p-2 border rounded"
-            placeholder="Search by content"
-          />
-        </div>
-        <div>
-          <label htmlFor="tags" className="block font-bold mb-1">
-            Tags (comma-separated)
-          </label>
-          <input
-            type="text"
-            id="tags"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            className="w-full p-2 border rounded"
-            placeholder="e.g., beginner, JavaScript"
-          />
-        </div>
-        <div>
-          <label htmlFor="codeTemplateId" className="block font-bold mb-1">
-            Code Template ID
-          </label>
-          <input
-            type="text"
-            id="codeTemplateId"
-            value={codeTemplateId}
-            onChange={(e) => setCodeTemplateId(e.target.value)}
-            className="w-full p-2 border rounded"
-            placeholder="Search by code template ID"
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-        >
-          Search
-        </button>
-      </form>
+        {/* Search Form */}
+        <form onSubmit={handleSearch} className="mb-6 space-y-4">
+          <div>
+            <label htmlFor="title" className="block font-bold mb-1">
+              Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full p-2 border rounded"
+              placeholder="Search by title"
+            />
+          </div>
+          <div>
+            <label htmlFor="content" className="block font-bold mb-1">
+              Content
+            </label>
+            <input
+              type="text"
+              id="content"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className="w-full p-2 border rounded"
+              placeholder="Search by content"
+            />
+          </div>
+          <div>
+            <label htmlFor="tags" className="block font-bold mb-1">
+              Tags (comma-separated)
+            </label>
+            <input
+              type="text"
+              id="tags"
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              className="w-full p-2 border rounded"
+              placeholder="e.g., beginner, JavaScript"
+            />
+          </div>
+          <div>
+            <label htmlFor="codeTemplateId" className="block font-bold mb-1">
+              Code Template ID
+            </label>
+            <input
+              type="text"
+              id="codeTemplateId"
+              value={codeTemplateId}
+              onChange={(e) => setCodeTemplateId(e.target.value)}
+              className="w-full p-2 border rounded"
+              placeholder="Search by code template ID"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+          >
+            Search
+          </button>
+        </form>
 
 
-      {/* Error Message */}
-      {error && <div className="text-red-500 mb-4">{error}</div>}
+        {/* Error Message */}
+        {error && <div className="text-red-500 mb-4">{error}</div>}
 
 
-      {/* Blog Posts List */}
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <div>
-          {blogPosts.length === 0 ? (
-            <p>No blog posts found.</p>
-          ) : (
-            <ul className="space-y-4">
-              {blogPosts.map((post) => (
-                <li
-                  key={post.id}
-                  className="border p-4 rounded flex justify-between items-center"
-                >
-                  <div>
-                    <h3 className="font-bold text-lg">{post.title}</h3>
-                    <p>{post.description}</p>
-                    <p>
-                      <strong>Author:</strong>{" "}
-                      {post.author.username || "Unknown"}
-                    </p>
-                    <p>
-                      <strong>Tags:</strong>{" "}
-                      {post.tags.map((tag) => tag.name).join(", ") || "None"}
-                    </p>
-                    <p>
-                      <strong>Score:</strong> {post.score}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => handleViewPost(post.id)}
-                    className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+        {/* Blog Posts List */}
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <div>
+            {blogPosts.length === 0 ? (
+              <p>No blog posts found.</p>
+            ) : (
+              <ul className="space-y-4">
+                {blogPosts.map((post) => (
+                  <li
+                    key={post.id}
+                    className="border p-4 rounded flex justify-between items-center"
                   >
-                    View Post
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+                    <div>
+                      <h3 className="font-bold text-lg">{post.title}</h3>
+                      <p>{post.description}</p>
+                      <p>
+                        <strong>Author:</strong>{" "}
+                        {post.author.username || "Unknown"}
+                      </p>
+                      <p>
+                        <strong>Tags:</strong>{" "}
+                        {post.tags.map((tag) => tag.name).join(", ") || "None"}
+                      </p>
+                      <p>
+                        <strong>Score:</strong> {post.score}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleViewPost(post.id)}
+                      className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+                    >
+                      View Post
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
 
 
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="flex justify-between mt-6">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-300"
-              >
-                Previous
-              </button>
-              <span>
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-300"
-              >
-                Next
-              </button>
-            </div>
-          )}
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-between mt-6">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-300"
+                >
+                  Previous
+                </button>
+                <span>
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-300"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+        <div className="mt-6 space-y-4">
+          <button
+            onClick={() => router.back()}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+          >
+            Back
+          </button>
         </div>
-      )}
-    </div>
+      </div>
+
     </>
   );
 };
