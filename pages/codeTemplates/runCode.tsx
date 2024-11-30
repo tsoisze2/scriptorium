@@ -75,6 +75,13 @@ const CodeRunner: React.FC = () => {
           <option value="java">Java</option>
           <option value="c">C</option>
           <option value="cpp">C++</option>
+          <option value="r">R</option>
+          <option value="rust">Ruse</option>
+          <option value="kotlin">Kotlin</option>
+          <option value="swift">Swift</option>
+          <option value="ruby">Ruby</option>
+          <option value="go">Go</option>
+          <option value="php">Php</option>
         </select>
       </div>
 
