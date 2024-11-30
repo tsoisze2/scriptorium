@@ -27,7 +27,7 @@ interface ApiResponse {
     currentPage: number;
 }
 
-const MyTemplates: React.FC = () => {
+const searchTemplates: React.FC = () => {
     const [templates, setTemplates] = useState<Template[]>([]);
     const [totalTemplates, setTotalTemplates] = useState<number>(0);
     const [currentPage, setCurrentPage] = useState<number>(1);
@@ -58,7 +58,7 @@ const MyTemplates: React.FC = () => {
       
             // Use the api instance, which already includes the base URL '/api' and token handling
             const response = await axios.post(
-                "/api/codeTemplate/searchMyTemplates", 
+                "/api/codeTemplate/search", 
                 {...searchParams, page: currentPage}, 
                 {
                 headers: {
@@ -92,30 +92,6 @@ const MyTemplates: React.FC = () => {
     const handlePageChange = (page: number) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
-        }
-    };
-
-    const handleDelete = async (templateId: number) => {
-        try {
-            const confirmDelete = window.confirm("Are you sure you want to delete this template?");
-            if (!confirmDelete) return;
-
-            // Call the API to delete the template
-            const accessToken = localStorage.getItem("accessToken");
-
-            await axios.delete('/api/codeTemplate/delete', {
-                data: { codeTemplateId: templateId },
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`
-                }
-            });
-
-            // Update the state to remove the deleted template
-            setTemplates((prevTemplates) => prevTemplates.filter(template => template.id !== templateId));
-            alert("Template deleted successfully.");
-        } catch (error) {
-            console.error("Failed to delete the template:", error);
-            alert("An error occurred while trying to delete the template. Please try again later.");
         }
     };
 
@@ -154,7 +130,7 @@ const MyTemplates: React.FC = () => {
 
     return (
         <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold mb-4">My Code Templates</h2>
+            <h2 className="text-2xl font-bold mb-4">Code Templates</h2>
 
             {/* Search Form */}
             <form onSubmit={handleSearchSubmit} className="mb-6">
@@ -246,12 +222,6 @@ const MyTemplates: React.FC = () => {
                                         ))}
                                     </div>
                                     <button
-                                        onClick={() => handleDelete(template.id)}
-                                        className="mt-4 bg-red-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-                                    >
-                                        Delete
-                                    </button>
-                                    <button
                                         onClick={() => handleFork(template.id)}
                                         className="mt-4 bg-green-600 text-white py-2 px-4 rounded hover:bg-blue-700"
                                     >
@@ -298,4 +268,4 @@ const MyTemplates: React.FC = () => {
     );
 };
 
-export default MyTemplates;
+export default searchTemplates;
