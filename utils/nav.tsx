@@ -73,7 +73,7 @@ const NavBar: React.FC = () => {
   }, [router]);
 
   return (
-    <nav className="bg-blue-600 text-white p-4">
+    <nav className="bg-blue-600 text-white p-4 space-x-4">
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo */}
         <div
@@ -84,25 +84,28 @@ const NavBar: React.FC = () => {
         </div>
 
         {/* Links */}
-        <ul className="flex space-x-6">
+        <ul className="flex justify-between p-5 space-x-5">
           <li
             className="cursor-pointer hover:text-gray-300"
             onClick={() => handleNavigation("/")}
           >
             Home
           </li>
+          <li>   ----   </li>
           <li
             className="cursor-pointer hover:text-gray-300"
             onClick={() => handleNavigation("/blogPost/search")}
           >
             Blog Posts
           </li>
+          <li>   ----   </li>
           <li
             className="cursor-pointer hover:text-gray-300"
             onClick={() => handleNavigation("/codeTemplates/search")}
           >
             Code Templates
           </li>
+          <li>   ----   </li>
           <li
             className="cursor-pointer hover:text-gray-300"
             onClick={() => handleNavigation("/codeTemplates/runCode")}
@@ -120,7 +123,7 @@ const NavBar: React.FC = () => {
             User
           </button>
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg">
+            <div className="absolute right-0 mt-2 w-48 bg-black text-white rounded shadow-lg">
 
               {profile && (
                 <button

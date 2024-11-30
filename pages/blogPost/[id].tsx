@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
-import { User } from "@prisma/client";
+import { User, CodeTemplate } from "@prisma/client";
 
 
 interface UserProfile {
@@ -19,6 +19,7 @@ interface BlogPost {
   createdAt: string;
   lastModified: string;
   author: User;
+  codeTemplate: CodeTemplate;
 }
 
 
@@ -237,7 +238,7 @@ const BlogPostDetails: React.FC = () => {
   };
 
   const handlecodetemplate = (postId: number) => {
-    router.push(`/blogPost/codeTemplates/${postId}`);
+    router.push(`/codeTemplates/${postId}`);
   };
 
 
@@ -304,12 +305,12 @@ const BlogPostDetails: React.FC = () => {
         </button>
       )}
 
-      {profile?.username === blogPost.author.username && (
+      {blogPost.codeTemplate && (
         <button
-          onClick={() => handlecodetemplate(blogPost.id)}
+          onClick={() => handlecodetemplate(blogPost.codeTemplate.id)}
           className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
         >
-          CodeTemplate
+          Code Template: {blogPost.codeTemplate.title}
         </button>
       )}
 
